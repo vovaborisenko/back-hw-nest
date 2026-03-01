@@ -28,7 +28,7 @@ export class UsersService {
     return user._id.toString();
   }
 
-  async deleteUser(id: string) {
+  async deleteUser(id: string): Promise<void> {
     const user = await this.usersRepository.findByIdOrNotFountFail(id);
 
     user.makeDeleted();
