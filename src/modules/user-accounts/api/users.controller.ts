@@ -8,7 +8,6 @@ import {
   Param,
   Post,
   Query,
-  ValidationPipe,
 } from '@nestjs/common';
 import { UsersService } from '../application/users.service';
 import type { CreateUserInputDto } from './input-dto/users.input-dto';
@@ -26,7 +25,7 @@ export class UsersController {
 
   @Get()
   getAll(
-    @Query(new ValidationPipe({ transform: true }))
+    @Query()
     query: GetUsersQueryParamsInputDto,
   ): Promise<BasePaginatedViewDto<UserViewDto[]>> {
     return this.usersQueryRepository.getAll(query);

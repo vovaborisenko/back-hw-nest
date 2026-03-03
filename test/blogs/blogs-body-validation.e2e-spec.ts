@@ -5,8 +5,9 @@ import { HttpStatus, INestApplication } from '@nestjs/common';
 import { App } from 'supertest/types';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../../src/app.module';
+import { appSetup } from '../../src/setup/app.setup';
 
-const PATH = 'blogs';
+const PATH = '/api/blogs';
 
 describe.skip('Blogs API body validation', () => {
   let nestApp: INestApplication<App>;
@@ -18,6 +19,9 @@ describe.skip('Blogs API body validation', () => {
     }).compile();
 
     nestApp = moduleFixture.createNestApplication<INestApplication<App>>();
+
+    appSetup(nestApp);
+
     await nestApp.init();
 
     app = nestApp.getHttpServer();
@@ -29,7 +33,7 @@ describe.skip('Blogs API body validation', () => {
 
   beforeEach(async () => {
     await request(app)
-      .delete('/testing/all-data')
+      .delete('/api/testing/all-data')
       .expect(HttpStatus.NO_CONTENT);
   });
 

@@ -47,7 +47,7 @@ export async function createUser(
   dto: CreateUserInputDto = userDto.create[0],
 ): Promise<UserViewDto> {
   const { body: user } = await request(app)
-    .post('/users')
+    .post('/api/users')
     .set('Authorization', validAuth)
     .send(dto)
     .expect(HttpStatus.CREATED);
@@ -77,7 +77,7 @@ export async function loginUser(
   userAgent: string = USER_AGENTS[0],
 ): Promise<{ token: string; refreshToken: string }> {
   const response = await request(app)
-    .post(`/login`)
+    .post(`/api/login`)
     .set('User-Agent', userAgent)
     .send({
       loginOrEmail: dto.login,

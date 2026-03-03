@@ -29,7 +29,7 @@ export const postDto: {
   },
 };
 
-const PATH = '/posts';
+const PATH = '/api/posts';
 
 export async function createPost(
   app: App,

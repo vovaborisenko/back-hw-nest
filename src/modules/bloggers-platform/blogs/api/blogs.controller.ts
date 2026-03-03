@@ -9,7 +9,6 @@ import {
   Post,
   Put,
   Query,
-  ValidationPipe,
 } from '@nestjs/common';
 import { BasePaginatedViewDto } from '../../../../core/api/view-dto/base.paginated.view-dto';
 import { BlogViewDto } from './view-dto/blog.view-dto';
@@ -19,7 +18,6 @@ import { GetBlogsQueryParamsInputDto } from './input-dto/get-blogs.query-params.
 import { CreateBlogInputDto } from './input-dto/create-blog.input-dto';
 import { UpdateBlogInputDto } from './input-dto/update-blog.input-dto';
 import { PostViewDto } from '../../posts/api/view-dto/post.view-dto';
-import { CreatePostInputDto } from '../../posts/api/input-dto/create-post.input-dto';
 import { GetPostsQueryParamsInputDto } from '../../posts/api/input-dto/get-posts.query-params.input-dto';
 import { PostsService } from '../../posts/application/posts.service';
 import { PostsQueryRepository } from '../../posts/infrastructure/posts.query-repository';
@@ -36,7 +34,7 @@ export class BlogsController {
 
   @Get()
   getAll(
-    @Query(new ValidationPipe({ transform: true }))
+    @Query()
     query: GetBlogsQueryParamsInputDto,
   ): Promise<BasePaginatedViewDto<BlogViewDto[]>> {
     return this.blogsQueryRepository.getAll(query);
@@ -72,7 +70,7 @@ export class BlogsController {
   @Get(':blogId/posts')
   async getBlogPosts(
     @Param('blogId') blogId: string,
-    @Query(new ValidationPipe({ transform: true }))
+    @Query()
     query: GetPostsQueryParamsInputDto,
   ): Promise<BasePaginatedViewDto<PostViewDto[]>> {
     await this.blogsQueryRepository.getByIdOrNotFoundFail(blogId);

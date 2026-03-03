@@ -5,8 +5,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { invalidAuth, validAuth, validMongoId } from '../constants/common';
 import { createUser, createUsers, userDto } from '../utils/user/user.util';
 import { AppModule } from '../../src/app.module';
+import { appSetup } from '../../src/setup/app.setup';
 
-const PATH = '/users';
+const PATH = '/api/users';
 
 describe('UsersController (e2e)', () => {
   let nestApp: INestApplication<App>;
@@ -18,6 +19,9 @@ describe('UsersController (e2e)', () => {
     }).compile();
 
     nestApp = moduleFixture.createNestApplication<INestApplication<App>>();
+
+    appSetup(nestApp);
+
     await nestApp.init();
 
     app = nestApp.getHttpServer();
@@ -29,7 +33,7 @@ describe('UsersController (e2e)', () => {
 
   beforeEach(async () => {
     await request(app)
-      .delete('/testing/all-data')
+      .delete('/api/testing/all-data')
       .expect(HttpStatus.NO_CONTENT);
   });
 

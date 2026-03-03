@@ -19,9 +19,10 @@ import { HttpStatus, INestApplication } from '@nestjs/common';
 import { App } from 'supertest/types';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../../src/app.module';
+import { appSetup } from '../../src/setup/app.setup';
 // import { LikeStatus } from '../../../src/likes/types/like';
 
-const PATH = '/posts';
+const PATH = '/api/posts';
 
 describe('Posts API', () => {
   let nestApp: INestApplication<App>;
@@ -33,6 +34,9 @@ describe('Posts API', () => {
     }).compile();
 
     nestApp = moduleFixture.createNestApplication<INestApplication<App>>();
+
+    appSetup(nestApp);
+
     await nestApp.init();
 
     app = nestApp.getHttpServer();
@@ -44,7 +48,7 @@ describe('Posts API', () => {
 
   beforeEach(async () => {
     await request(app)
-      .delete('/testing/all-data')
+      .delete('/api/testing/all-data')
       .expect(HttpStatus.NO_CONTENT);
   });
 

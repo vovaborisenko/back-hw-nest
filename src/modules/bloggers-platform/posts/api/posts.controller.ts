@@ -9,7 +9,6 @@ import {
   Post,
   Put,
   Query,
-  ValidationPipe,
 } from '@nestjs/common';
 import { BasePaginatedViewDto } from '../../../../core/api/view-dto/base.paginated.view-dto';
 import { PostViewDto } from './view-dto/post.view-dto';
@@ -28,7 +27,7 @@ export class PostsController {
 
   @Get()
   getAll(
-    @Query(new ValidationPipe({ transform: true }))
+    @Query()
     query: GetPostsQueryParamsInputDto,
   ): Promise<BasePaginatedViewDto<PostViewDto[]>> {
     return this.postsQueryRepository.getAll(query);

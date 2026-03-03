@@ -27,7 +27,7 @@ export async function createBlog(
   dto: CreateBlogInputDto = blogDto.create,
 ): Promise<BlogViewDto> {
   const { body: blog } = await request(app)
-    .post('/blogs')
+    .post('/api/blogs')
     .set('Authorization', validAuth)
     .send(dto)
     .expect(HttpStatus.CREATED);
