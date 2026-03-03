@@ -30,6 +30,7 @@ export class PostsQueryRepository {
 
   async getAll(
     query: GetPostsQueryParamsInputDto,
+    options?: { blogId?: string | Types.ObjectId },
   ): Promise<BasePaginatedViewDto<PostViewDto[]>> {
     const skip = query.calculateSkip();
     const sort = {
@@ -37,6 +38,10 @@ export class PostsQueryRepository {
       _id: query.sortDirection,
     };
     const filter: QueryFilter<PostDocument> = {};
+
+    if (options?.blogId) {
+      filter.blog = new Types.ObjectId(options.blogId);
+    }
 
     const [items, totalCount] = await Promise.all([
       this.PostModel.find(filter)

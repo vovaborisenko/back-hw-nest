@@ -163,7 +163,7 @@ describe('BlogsController (e2e)', () => {
     });
   });
 
-  describe.skip('Test blog-posts', () => {
+  describe('Test blog-posts', () => {
     const newPost = {
       title: 'Новые возможности TypeScript',
       shortDescription: 'Обзор новых фич и улучшений в TypeScript',
