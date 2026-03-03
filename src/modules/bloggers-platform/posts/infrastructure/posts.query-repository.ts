@@ -6,6 +6,7 @@ import type { PostModelType } from '../domain/post.entity';
 import { PostViewDto } from '../api/view-dto/post.view-dto';
 import { BasePaginatedViewDto } from '../../../../core/api/view-dto/base.paginated.view-dto';
 import { GetPostsQueryParamsInputDto } from '../api/input-dto/get-posts.query-params.input-dto';
+import { PostsSortBy } from '../api/input-dto/posts.sort-by';
 
 @Injectable()
 export class PostsQueryRepository {
@@ -28,13 +29,17 @@ export class PostsQueryRepository {
     };
   }
 
+  private getSortBy(querySortBy: PostsSortBy): string {
+    return querySortBy === PostsSortBy.blogName ? 'blog.name' : querySortBy;
+  }
+
   async getAll(
     query: GetPostsQueryParamsInputDto,
     options?: { blogId?: string | Types.ObjectId },
   ): Promise<BasePaginatedViewDto<PostViewDto[]>> {
     const skip = query.calculateSkip();
     const sort = {
-      [query.sortBy]: query.sortDirection,
+      [this.getSortBy(query.sortBy)]: query.sortDirection,
       _id: query.sortDirection,
     };
     const filter: QueryFilter<PostDocument> = {};
@@ -44,12 +49,30 @@ export class PostsQueryRepository {
     }
 
     const [items, totalCount] = await Promise.all([
-      this.PostModel.find(filter)
+      this.PostModel.aggregate()
+        .match(filter)
+        .lookup({
+          from: 'blogs',
+          localField: 'blog',
+          foreignField: '_id',
+          as: 'blog',
+        })
+        .unwind({
+          path: '$blog',
+          preserveNullAndEmptyArrays: true,
+        })
+        .addFields({
+          blog: {
+            $cond: {
+              if: { $eq: ['$blog', null] },
+              then: { _id: '$blog' },
+              else: '$blog',
+            },
+          },
+        })
         .sort(sort)
         .skip(skip)
-        .limit(query.pageSize)
-        .populate(this.populateOptions)
-        .lean(),
+        .limit(query.pageSize),
       this.PostModel.countDocuments(filter),
     ]);
 

@@ -3,9 +3,10 @@ import { invalidAuth, validAuth, validMongoId } from '../constants/common';
 import {
   createBlogAndHisPost,
   createBlogAndHisPosts,
+  createPost,
   postDto,
 } from '../utils/post/post.util';
-import { createBlog } from '../utils/blog/blog.util';
+import { createBlog, createBlogs } from '../utils/blog/blog.util';
 // import {
 //   commentDto,
 //   createComment,
@@ -122,6 +123,24 @@ describe('Posts API', () => {
       const response = await request(app).get(PATH).expect(HttpStatus.OK);
 
       expect(response.body.items.length).toBe(2);
+    });
+
+    it('should return sorted by blogName list of posts', async () => {
+      const blogs = await createBlogs(12, app);
+      await Promise.all(
+        blogs.map(({ id }) =>
+          createPost(app, { ...postDto.create, blogId: id }),
+        ),
+      );
+
+      const response = await request(app)
+        .get(`${PATH}?sortBy=blogName`)
+        .expect(HttpStatus.OK);
+
+      const blogNames = response.body.items.map(({ blogName }) => blogName);
+      const expectedNames = blogNames.toSorted((a, b) => (a < b ? 1 : -1));
+
+      expect(blogNames).toEqual(expectedNames);
     });
   });
 
