@@ -1,5 +1,5 @@
 import { PopulateOptions, QueryFilter, Types } from 'mongoose';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Post, PostDocument } from '../domain/post.entity';
 import type { PostModelType } from '../domain/post.entity';
@@ -7,6 +7,8 @@ import { PostViewDto } from '../api/view-dto/post.view-dto';
 import { BasePaginatedViewDto } from '../../../../core/api/view-dto/base.paginated.view-dto';
 import { GetPostsQueryParamsInputDto } from '../api/input-dto/get-posts.query-params.input-dto';
 import { PostsSortBy } from '../api/input-dto/posts.sort-by';
+import { DomainException } from '../../../../core/exceptions/domain-exceptions';
+import { DomainExceptionCode } from '../../../../core/exceptions/domain-exception-code';
 
 @Injectable()
 export class PostsQueryRepository {
@@ -37,7 +39,7 @@ export class PostsQueryRepository {
     query: GetPostsQueryParamsInputDto,
     options?: { blogId?: string | Types.ObjectId },
   ): Promise<BasePaginatedViewDto<PostViewDto[]>> {
-    const skip = query.calculateSkip();
+    const skip = query.skip;
     const sort = {
       [this.getSortBy(query.sortBy)]: query.sortDirection,
       _id: query.sortDirection,
@@ -99,7 +101,10 @@ export class PostsQueryRepository {
     const post = await this.findById(id);
 
     if (!post) {
-      throw new NotFoundException('Post not found');
+      throw new DomainException({
+        code: DomainExceptionCode.NotFound,
+        message: 'Post not found',
+      });
     }
 
     return PostViewDto.mapToView(post);

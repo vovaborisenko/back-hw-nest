@@ -10,11 +10,12 @@ import {
   Query,
 } from '@nestjs/common';
 import { UsersService } from '../application/users.service';
-import type { CreateUserInputDto } from './input-dto/users.input-dto';
+import { CreateUserInputDto } from './input-dto/users.input-dto';
 import { UsersQueryRepository } from '../infrastructure/users.query-repository';
 import type { UserViewDto } from './view-dto/users.view-dto';
 import { GetUsersQueryParamsInputDto } from './input-dto/get-users.query-params.input-dto';
 import { BasePaginatedViewDto } from '../../../core/api/view-dto/base.paginated.view-dto';
+import { BasePathParamsInputDto } from '../../../core/api/input-dto/base.path-params.input-dto';
 
 @Controller('users')
 export class UsersController {
@@ -40,7 +41,7 @@ export class UsersController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteUser(@Param('id') id: string) {
-    await this.usersService.deleteUser(id);
+  async deleteUser(@Param() params: BasePathParamsInputDto) {
+    await this.usersService.deleteUser(params.id);
   }
 }

@@ -9,7 +9,7 @@ import { appSetup } from '../../src/setup/app.setup';
 
 const PATH = '/api/users';
 
-describe.skip('Users API body validation', () => {
+describe('Users API body validation', () => {
   let nestApp: INestApplication<App>;
   let app: App;
 
@@ -40,26 +40,26 @@ describe.skip('Users API body validation', () => {
   describe(`POST ${PATH}`, () => {
     it.each`
       field         | value             | message
-      ${'login'}    | ${null}           | ${'login should be string'}
-      ${'login'}    | ${5}              | ${'login should be string'}
-      ${'login'}    | ${''}             | ${'Length of login should be between 3 and 10'}
-      ${'login'}    | ${'   '}          | ${'Length of login should be between 3 and 10'}
-      ${'login'}    | ${'ar '}          | ${'Length of login should be between 3 and 10'}
-      ${'login'}    | ${'ar-23_ZvtV45'} | ${'Length of login should be between 3 and 10'}
-      ${'login'}    | ${'ar-23+vtV'}    | ${'Invalid value'}
-      ${'email'}    | ${null}           | ${'email should be string'}
-      ${'email'}    | ${5}              | ${'email should be string'}
-      ${'email'}    | ${''}             | ${'Length of email should be between 6 and Infinity'}
-      ${'email'}    | ${'   '}          | ${'Length of email should be between 6 and Infinity'}
-      ${'email'}    | ${'w@w.s'}        | ${'Length of email should be between 6 and Infinity'}
-      ${'email'}    | ${'w$@w.s_u'}     | ${'Invalid value'}
-      ${'email'}    | ${'ar-23_ZvfrtV'} | ${'Invalid value'}
-      ${'password'} | ${null}           | ${'password should be string'}
-      ${'password'} | ${5}              | ${'password should be string'}
-      ${'password'} | ${''}             | ${'Length of password should be between 6 and 20'}
-      ${'password'} | ${'   '}          | ${'Length of password should be between 6 and 20'}
-      ${'password'} | ${' dfe@#  '}     | ${'Length of password should be between 6 and 20'}
-      ${'password'} | ${longPassword}   | ${'Length of password should be between 6 and 20'}
+      ${'login'}    | ${null}           | ${'login must be a string; Received value: null'}
+      ${'login'}    | ${5}              | ${'login must be a string; Received value: 5'}
+      ${'login'}    | ${''}             | ${'login must be longer than or equal to 3 characters; Received value: '}
+      ${'login'}    | ${'   '}          | ${'login must be longer than or equal to 3 characters; Received value: '}
+      ${'login'}    | ${'ar '}          | ${'login must be longer than or equal to 3 characters; Received value: ar'}
+      ${'login'}    | ${'ar-23_ZvtV45'} | ${'login must be shorter than or equal to 10 characters; Received value: ar-23_ZvtV45'}
+      ${'login'}    | ${'ar-23+vtV'}    | ${'login must match /^[a-z0-9_-]*$/i regular expression; Received value: ar-23+vtV'}
+      ${'email'}    | ${null}           | ${'email must be a string; Received value: null'}
+      ${'email'}    | ${5}              | ${'email must be a string; Received value: 5'}
+      ${'email'}    | ${''}             | ${'email must be longer than or equal to 5 characters; Received value: '}
+      ${'email'}    | ${'   '}          | ${'email must be longer than or equal to 5 characters; Received value: '}
+      ${'email'}    | ${'w@w.s'}        | ${'email must match /^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$/i regular expression; Received value: w@w.s'}
+      ${'email'}    | ${'w$@w.s_u'}     | ${'email must match /^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$/i regular expression; Received value: w$@w.s_u'}
+      ${'email'}    | ${'ar-23_ZvfrtV'} | ${'email must match /^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$/i regular expression; Received value: ar-23_ZvfrtV'}
+      ${'password'} | ${null}           | ${'password must be a string; Received value: null'}
+      ${'password'} | ${5}              | ${'password must be a string; Received value: 5'}
+      ${'password'} | ${''}             | ${'password must be longer than or equal to 6 characters; Received value: '}
+      ${'password'} | ${'   '}          | ${'password must be longer than or equal to 6 characters; Received value: '}
+      ${'password'} | ${' dfe@#  '}     | ${'password must be longer than or equal to 6 characters; Received value: dfe@#'}
+      ${'password'} | ${longPassword}   | ${'password must be shorter than or equal to 20 characters; Received value: asff-awf+asws@ASDf$f#'}
     `(
       'should throw 400: field = $field, value = $value, message = $message',
       async ({ field, value, message }) => {

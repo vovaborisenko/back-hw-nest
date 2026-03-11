@@ -5,6 +5,9 @@ import { User } from '../domain/user.entity';
 import { UsersRepository } from '../infrastructure/users.repository';
 import type { CreateUserDto } from '../dto/create-user.dto';
 import { BcryptService } from './bcrypt.service';
+import { Types } from 'mongoose';
+import { DomainException } from '../../../core/exceptions/domain-exceptions';
+import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-code';
 
 @Injectable()
 export class UsersService {
@@ -15,6 +18,26 @@ export class UsersService {
   ) {}
 
   async createUser(dto: CreateUserDto): Promise<string> {
+    const userByEmail = await this.usersRepository.findByEmail(dto.email);
+
+    if (userByEmail) {
+      throw new DomainException({
+        code: DomainExceptionCode.BadRequest,
+        message: 'Email already exists',
+        extensions: [{ field: 'email', message: 'Email should be uniq' }],
+      });
+    }
+
+    const userByLogin = await this.usersRepository.findByLogin(dto.login);
+
+    if (userByLogin) {
+      throw new DomainException({
+        code: DomainExceptionCode.BadRequest,
+        message: 'Login already exists',
+        extensions: [{ field: 'login', message: 'Login should be uniq' }],
+      });
+    }
+
     const passwordHash = await this.bcryptService.createHash(dto.password);
 
     const user = this.UserModel.createInstance({
@@ -28,7 +51,7 @@ export class UsersService {
     return user._id.toString();
   }
 
-  async deleteUser(id: string): Promise<void> {
+  async deleteUser(id: string | Types.ObjectId): Promise<void> {
     const user = await this.usersRepository.findByIdOrNotFountFail(id);
 
     user.makeDeleted();

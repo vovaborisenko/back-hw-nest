@@ -71,7 +71,7 @@ describe('UsersController (e2e)', () => {
       });
     });
 
-    it.skip.each`
+    it.each`
       field
       ${'login'}
       ${'email'}
@@ -165,7 +165,7 @@ describe('UsersController (e2e)', () => {
   });
 
   describe(`DELETE ${PATH}/:id`, () => {
-    it.skip('should return 400 when invalid id', async () => {
+    it('should return 400 when invalid id', async () => {
       await request(app)
         .delete(`${PATH}/someinvalidid`)
         .set('Authorization', validAuth)
