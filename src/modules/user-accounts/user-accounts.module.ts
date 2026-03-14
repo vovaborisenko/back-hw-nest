@@ -6,6 +6,7 @@ import { BcryptService } from './application/bcrypt.service';
 import { UsersService } from './application/users.service';
 import { UsersRepository } from './infrastructure/users.repository';
 import { UsersQueryRepository } from './infrastructure/users.query-repository';
+import { BasicStrategy } from './guards/basic/basic.strategy';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { UsersQueryRepository } from './infrastructure/users.query-repository';
   ],
   controllers: [UsersController],
   providers: [
+    BasicStrategy,
     UsersService,
     UsersRepository,
     UsersQueryRepository,

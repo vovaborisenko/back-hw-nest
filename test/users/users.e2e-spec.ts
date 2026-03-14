@@ -37,7 +37,7 @@ describe('UsersController (e2e)', () => {
       .expect(HttpStatus.NO_CONTENT);
   });
 
-  it.skip.each`
+  it.each`
     path            | method
     ${PATH}         | ${'get'}
     ${PATH}         | ${'post'}
