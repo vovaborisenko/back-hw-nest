@@ -22,8 +22,11 @@ import { GetPostsQueryParamsInputDto } from '../../posts/api/input-dto/get-posts
 import { PostsService } from '../../posts/application/posts.service';
 import { PostsQueryRepository } from '../../posts/infrastructure/posts.query-repository';
 import { CreateBlogPostInputDto } from './input-dto/create-blog-post.input-dto';
+import { PATH, PARAM } from '../../../../core/constants/paths';
 
-@Controller('blogs')
+const { PREFIX, SINGLE, POSTS } = PATH.BLOGS;
+
+@Controller(PREFIX)
 export class BlogsController {
   constructor(
     private readonly blogService: BlogsService,
@@ -40,8 +43,8 @@ export class BlogsController {
     return this.blogsQueryRepository.getAll(query);
   }
 
-  @Get(':id')
-  getById(@Param('id') id: string): Promise<BlogViewDto> {
+  @Get(SINGLE)
+  getById(@Param(PARAM.ID) id: string): Promise<BlogViewDto> {
     return this.blogsQueryRepository.getByIdOrNotFoundFail(id);
   }
 
@@ -52,24 +55,24 @@ export class BlogsController {
     return this.blogsQueryRepository.getByIdOrNotFoundFail(id);
   }
 
-  @Put(':id')
+  @Put(SINGLE)
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateBlog(
-    @Param('id') id: string,
+    @Param(PARAM.ID) id: string,
     @Body() dto: UpdateBlogInputDto,
   ): Promise<void> {
     await this.blogService.updateBlog(id, dto);
   }
 
-  @Delete(':id')
+  @Delete(SINGLE)
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteBlog(@Param('id') id: string): Promise<void> {
+  async deleteBlog(@Param(PARAM.ID) id: string): Promise<void> {
     await this.blogService.deleteBlog(id);
   }
 
-  @Get(':blogId/posts')
+  @Get(POSTS)
   async getBlogPosts(
-    @Param('blogId') blogId: string,
+    @Param(PARAM.ID) blogId: string,
     @Query()
     query: GetPostsQueryParamsInputDto,
   ): Promise<BasePaginatedViewDto<PostViewDto[]>> {
@@ -78,9 +81,9 @@ export class BlogsController {
     return this.postsQueryRepository.getAll(query, { blogId });
   }
 
-  @Post(':blogId/posts')
+  @Post(POSTS)
   async createPost(
-    @Param('blogId') blogId: string,
+    @Param(PARAM.ID) blogId: string,
     @Body() dto: CreateBlogPostInputDto,
   ): Promise<PostViewDto> {
     const id = await this.postService.createPost({ ...dto, blogId });

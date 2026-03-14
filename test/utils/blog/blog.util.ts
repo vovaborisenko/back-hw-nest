@@ -5,6 +5,7 @@ import { CreateBlogInputDto } from '../../../src/modules/bloggers-platform/blogs
 import { UpdateBlogInputDto } from '../../../src/modules/bloggers-platform/blogs/api/input-dto/update-blog.input-dto';
 import { HttpStatus } from '@nestjs/common';
 import { BlogViewDto } from '../../../src/modules/bloggers-platform/blogs/api/view-dto/blog.view-dto';
+import { FULL_PATH } from '../../../src/core/constants/paths';
 
 export const blogDto: {
   create: CreateBlogInputDto;
@@ -27,7 +28,7 @@ export async function createBlog(
   dto: CreateBlogInputDto = blogDto.create,
 ): Promise<BlogViewDto> {
   const { body: blog } = await request(app)
-    .post('/api/blogs')
+    .post(FULL_PATH.BLOGS)
     .set('Authorization', validAuth)
     .send(dto)
     .expect(HttpStatus.CREATED);

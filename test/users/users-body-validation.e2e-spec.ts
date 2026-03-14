@@ -6,8 +6,7 @@ import { App } from 'supertest/types';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../../src/app.module';
 import { appSetup } from '../../src/setup/app.setup';
-
-const PATH = '/api/users';
+import { FULL_PATH } from '../../src/core/constants/paths';
 
 describe('Users API body validation', () => {
   let nestApp: INestApplication<App>;
@@ -27,7 +26,7 @@ describe('Users API body validation', () => {
     app = nestApp.getHttpServer();
 
     await request(app)
-      .delete('/api/testing/all-data')
+      .delete(FULL_PATH.TESTING_ALL)
       .expect(HttpStatus.NO_CONTENT);
   });
 
@@ -37,7 +36,7 @@ describe('Users API body validation', () => {
 
   const longPassword = 'asff-awf+asws@ASDf$f#';
 
-  describe(`POST ${PATH}`, () => {
+  describe(`POST ${FULL_PATH.USERS}`, () => {
     it.each`
       field         | value             | message
       ${'login'}    | ${null}           | ${'login must be a string; Received value: null'}
@@ -64,7 +63,7 @@ describe('Users API body validation', () => {
       'should throw 400: field = $field, value = $value, message = $message',
       async ({ field, value, message }) => {
         const response = await request(app)
-          .post(PATH)
+          .post(FULL_PATH.USERS)
           .set('Authorization', validAuth)
           .send({ ...userDto.create[0], [field]: value })
           .expect(HttpStatus.BAD_REQUEST);

@@ -17,8 +17,11 @@ import { PostsQueryRepository } from '../infrastructure/posts.query-repository';
 import { GetPostsQueryParamsInputDto } from './input-dto/get-posts.query-params.input-dto';
 import { CreatePostInputDto } from './input-dto/create-post.input-dto';
 import { UpdatePostInputDto } from './input-dto/update-post.input-dto';
+import { PATH, PARAM } from '../../../../core/constants/paths';
 
-@Controller('posts')
+const { PREFIX, SINGLE } = PATH.POSTS;
+
+@Controller(PREFIX)
 export class PostsController {
   constructor(
     private readonly postService: PostsService,
@@ -33,8 +36,8 @@ export class PostsController {
     return this.postsQueryRepository.getAll(query);
   }
 
-  @Get(':id')
-  getById(@Param('id') id: string): Promise<PostViewDto> {
+  @Get(SINGLE)
+  getById(@Param(PARAM.ID) id: string): Promise<PostViewDto> {
     return this.postsQueryRepository.getByIdOrNotFoundFail(id);
   }
 
@@ -45,18 +48,18 @@ export class PostsController {
     return this.postsQueryRepository.getByIdOrNotFoundFail(id);
   }
 
-  @Put(':id')
+  @Put(SINGLE)
   @HttpCode(HttpStatus.NO_CONTENT)
   async updatePost(
-    @Param('id') id: string,
+    @Param(PARAM.ID) id: string,
     @Body() dto: UpdatePostInputDto,
   ): Promise<void> {
     await this.postService.updatePost(id, dto);
   }
 
-  @Delete(':id')
+  @Delete(SINGLE)
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deletePost(@Param('id') id: string): Promise<void> {
+  async deletePost(@Param(PARAM.ID) id: string): Promise<void> {
     await this.postService.deletePost(id);
   }
 }

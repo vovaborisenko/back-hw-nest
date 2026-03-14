@@ -1,0 +1,60 @@
+export const PARAM = {
+  ID: 'id',
+} as const;
+
+export const PATH = {
+  PREFIX: 'api',
+  AUTH: {
+    PREFIX: 'auth',
+    LOGIN: 'login',
+    LOGOUT: 'logout',
+    ME: 'me',
+    NEW_PASSWORD: 'new-password',
+    PASSWORD_RECOVERY: 'password-recovery',
+    REFRESH_TOKEN: 'refresh-token',
+    REGISTRATION: 'registration',
+    REG_CONFIRMATION: 'registration-confirmation',
+    REG_EMAIL_RESENDING: 'registration-email-resending',
+  },
+  BLOGS: {
+    PREFIX: 'blogs',
+    SINGLE: `:${PARAM.ID}`,
+    POSTS: `:${PARAM.ID}/posts`,
+  },
+  POSTS: {
+    PREFIX: 'posts',
+    SINGLE: `:${PARAM.ID}`,
+  },
+  USERS: {
+    PREFIX: 'users',
+    SINGLE: `:${PARAM.ID}`,
+  },
+  TESTING: {
+    PREFIX: 'testing',
+    ALL: 'all-data',
+  },
+} as const;
+
+export const FULL_PATH = {
+  BLOGS: `/${PATH.PREFIX}/${PATH.BLOGS.PREFIX}`,
+  BLOG: `/${PATH.PREFIX}/${PATH.BLOGS.PREFIX}/${PATH.BLOGS.SINGLE}`,
+  BLOG_POST: `/${PATH.PREFIX}/${PATH.BLOGS.PREFIX}/${PATH.BLOGS.POSTS}`,
+  //
+  POSTS: `/${PATH.PREFIX}/${PATH.POSTS.PREFIX}`,
+  POST: `/${PATH.PREFIX}/${PATH.POSTS.PREFIX}/${PATH.POSTS.SINGLE}`,
+  //
+  LOGIN: `/${PATH.PREFIX}/${PATH.AUTH.PREFIX}/${PATH.AUTH.LOGIN}`,
+  LOGOUT: `/${PATH.PREFIX}/${PATH.AUTH.PREFIX}/${PATH.AUTH.LOGOUT}`,
+  ME: `/${PATH.PREFIX}/${PATH.AUTH.PREFIX}/${PATH.AUTH.ME}`,
+  NEW_PASSWORD: `/${PATH.PREFIX}/${PATH.AUTH.PREFIX}/${PATH.AUTH.NEW_PASSWORD}`,
+  PASSWORD_RECOVERY: `/${PATH.PREFIX}/${PATH.AUTH.PREFIX}/${PATH.AUTH.PASSWORD_RECOVERY}`,
+  REFRESH_TOKEN: `/${PATH.PREFIX}/${PATH.AUTH.PREFIX}/${PATH.AUTH.REFRESH_TOKEN}`,
+  REGISTRATION: `/${PATH.PREFIX}/${PATH.AUTH.PREFIX}/${PATH.AUTH.REGISTRATION}`,
+  REG_CONFIRMATION: `/${PATH.PREFIX}/${PATH.AUTH.PREFIX}/${PATH.AUTH.REG_CONFIRMATION}`,
+  REG_EMAIL_RESENDING: `/${PATH.PREFIX}/${PATH.AUTH.PREFIX}/${PATH.AUTH.REG_EMAIL_RESENDING}`,
+  //
+  USERS: `/${PATH.PREFIX}/${PATH.USERS.PREFIX}`,
+  USER: `/${PATH.PREFIX}/${PATH.USERS.PREFIX}/${PATH.USERS.SINGLE}`,
+  //
+  TESTING_ALL: `/${PATH.PREFIX}/${PATH.TESTING.PREFIX}/${PATH.TESTING.ALL}`,
+} as const satisfies Record<string, string>;

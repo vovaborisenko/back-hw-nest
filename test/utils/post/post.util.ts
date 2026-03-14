@@ -8,6 +8,7 @@ import { HttpStatus } from '@nestjs/common';
 import { PostViewDto } from '../../../src/modules/bloggers-platform/posts/api/view-dto/post.view-dto';
 import { BlogViewDto } from '../../../src/modules/bloggers-platform/blogs/api/view-dto/blog.view-dto';
 import { CreateBlogInputDto } from '../../../src/modules/bloggers-platform/blogs/api/input-dto/create-blog.input-dto';
+import { FULL_PATH } from '../../../src/core/constants/paths';
 
 export const postDto: {
   create: CreatePostInputDto;
@@ -29,14 +30,12 @@ export const postDto: {
   },
 };
 
-const PATH = '/api/posts';
-
 export async function createPost(
   app: App,
   dto: CreatePostInputDto = postDto.create,
 ): Promise<PostViewDto> {
   const { body: post } = await request(app)
-    .post(PATH)
+    .post(FULL_PATH.POSTS)
     .set('Authorization', validAuth)
     .send({ ...dto })
     .expect(HttpStatus.CREATED);

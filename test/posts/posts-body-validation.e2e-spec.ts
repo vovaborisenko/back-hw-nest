@@ -9,6 +9,7 @@ import { App } from 'supertest/types';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../../src/app.module';
 import { appSetup } from '../../src/setup/app.setup';
+import { FULL_PATH } from '../../src/core/constants/paths';
 
 const PATH = '/api/posts';
 
@@ -36,7 +37,7 @@ describe.skip('Posts API body validation', () => {
 
   beforeEach(async () => {
     await request(app)
-      .delete('/api/testing/all-data')
+      .delete(FULL_PATH.TESTING_ALL)
       .expect(HttpStatus.NO_CONTENT);
   });
 
@@ -68,7 +69,7 @@ describe.skip('Posts API body validation', () => {
       async ({ field, value, message }) => {
         const blog = await createBlog(app);
         const response = await request(app)
-          .post(PATH)
+          .post(FULL_PATH.POSTS)
           .set('Authorization', validAuth)
           .send({ ...postDto.create, blogId: blog.id, [field]: value })
           .expect(HttpStatus.BAD_REQUEST);
@@ -82,7 +83,7 @@ describe.skip('Posts API body validation', () => {
     );
   });
 
-  describe(`PUT ${PATH}/:id`, () => {
+  describe(`PUT ${FULL_PATH.POST}`, () => {
     it.each`
       field                 | value               | message
       ${'title'}            | ${null}             | ${'title should be string'}
@@ -111,7 +112,7 @@ describe.skip('Posts API body validation', () => {
         const [blog, post] = await createBlogAndHisPost(app);
 
         const response = await request(app)
-          .put(`${PATH}/${post.id}`)
+          .put(`${FULL_PATH.POSTS}/${post.id}`)
           .set('Authorization', validAuth)
           .send({ ...postDto.update, blogId: blog.id, [field]: value })
           .expect(HttpStatus.BAD_REQUEST);

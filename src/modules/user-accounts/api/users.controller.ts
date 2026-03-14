@@ -18,9 +18,12 @@ import { GetUsersQueryParamsInputDto } from './input-dto/get-users.query-params.
 import { BasePaginatedViewDto } from '../../../core/api/view-dto/base.paginated.view-dto';
 import { BasePathParamsInputDto } from '../../../core/api/input-dto/base.path-params.input-dto';
 import { BasicAuthGuard } from '../guards/basic/basic-auth.guard';
+import { PARAM, PATH } from '../../../core/constants/paths';
+
+const { PREFIX, SINGLE } = PATH.USERS;
 
 @UseGuards(BasicAuthGuard)
-@Controller('users')
+@Controller(PREFIX)
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
@@ -42,9 +45,9 @@ export class UsersController {
     return this.usersQueryRepository.getByIdOrNotFountFail(userId);
   }
 
-  @Delete(':id')
+  @Delete(SINGLE)
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteUser(@Param() params: BasePathParamsInputDto) {
-    await this.usersService.deleteUser(params.id);
+    await this.usersService.deleteUser(params[PARAM.ID]);
   }
 }

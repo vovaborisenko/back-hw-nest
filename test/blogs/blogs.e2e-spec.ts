@@ -6,8 +6,7 @@ import { App } from 'supertest/types';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../../src/app.module';
 import { appSetup } from '../../src/setup/app.setup';
-
-const PATH = '/api/blogs';
+import { FULL_PATH } from '../../src/core/constants/paths';
 
 describe('BlogsController (e2e)', () => {
   let nestApp: INestApplication<App>;
@@ -33,16 +32,16 @@ describe('BlogsController (e2e)', () => {
 
   beforeEach(async () => {
     await request(app)
-      .delete('/api/testing/all-data')
+      .delete(FULL_PATH.TESTING_ALL)
       .expect(HttpStatus.NO_CONTENT);
   });
 
   it.skip.each`
-    path                  | method
-    ${PATH}               | ${'post'}
-    ${PATH + '/12'}       | ${'put'}
-    ${PATH + '/12'}       | ${'delete'}
-    ${PATH + '/12/posts'} | ${'post'}
+    path                             | method
+    ${FULL_PATH.BLOGS}               | ${'post'}
+    ${FULL_PATH.BLOGS + '/12'}       | ${'put'}
+    ${FULL_PATH.BLOGS + '/12'}       | ${'delete'}
+    ${FULL_PATH.BLOGS + '/12/posts'} | ${'post'}
   `(
     'should return 401 when invalid header Authorization: [$method] $path',
     async ({
@@ -60,7 +59,7 @@ describe('BlogsController (e2e)', () => {
     },
   );
 
-  describe(`POST ${PATH}`, () => {
+  describe(`POST ${FULL_PATH.BLOGS}`, () => {
     it('should create', async () => {
       const blog = await createBlog(app, blogDto.create);
 
@@ -73,9 +72,11 @@ describe('BlogsController (e2e)', () => {
     });
   });
 
-  describe(`GET ${PATH}`, () => {
+  describe(`GET ${FULL_PATH.BLOGS}`, () => {
     it('should return [] when no blogs', async () => {
-      const response = await request(app).get(PATH).expect(HttpStatus.OK);
+      const response = await request(app)
+        .get(FULL_PATH.BLOGS)
+        .expect(HttpStatus.OK);
 
       expect(response.body).toEqual({
         items: [],
@@ -88,7 +89,9 @@ describe('BlogsController (e2e)', () => {
 
     it('should return list of blogs', async () => {
       const [blog1, blog2] = await createBlogs(2, app);
-      const response = await request(app).get(PATH).expect(HttpStatus.OK);
+      const response = await request(app)
+        .get(FULL_PATH.BLOGS)
+        .expect(HttpStatus.OK);
 
       expect(response.body).toEqual({
         items: [blog2, blog1],
@@ -100,10 +103,10 @@ describe('BlogsController (e2e)', () => {
     });
   });
 
-  describe(`GET ${PATH}/:id`, () => {
+  describe(`GET ${FULL_PATH.BLOGS}/:id`, () => {
     it('should return 404 when no blog', async () => {
       await request(app)
-        .get(`${PATH}/${validMongoId}`)
+        .get(`${FULL_PATH.BLOGS}/${validMongoId}`)
         .expect(HttpStatus.NOT_FOUND);
     });
 
@@ -111,17 +114,17 @@ describe('BlogsController (e2e)', () => {
       const [, blog2] = await createBlogs(2, app);
 
       const response = await request(app)
-        .get(`${PATH}/${blog2.id}`)
+        .get(`${FULL_PATH.BLOGS}/${blog2.id}`)
         .expect(HttpStatus.OK);
 
       expect(response.body).toEqual(blog2);
     });
   });
 
-  describe(`PUT ${PATH}/:id`, () => {
+  describe(`PUT ${FULL_PATH.BLOGS}/:id`, () => {
     it('should return 404 when no blog', async () => {
       await request(app)
-        .put(`${PATH}/${validMongoId}`)
+        .put(`${FULL_PATH.BLOGS}/${validMongoId}`)
         .set('Authorization', validAuth)
         .send(blogDto.update)
         .expect(HttpStatus.NOT_FOUND);
@@ -131,28 +134,28 @@ describe('BlogsController (e2e)', () => {
       const [blog1, blog2] = await createBlogs(2, app);
 
       await request(app)
-        .put(`${PATH}/${blog1.id}`)
+        .put(`${FULL_PATH.BLOGS}/${blog1.id}`)
         .set('Authorization', validAuth)
         .send({ ...blogDto.update, minAgeRestriction: null })
         .expect(HttpStatus.NO_CONTENT);
       await request(app)
-        .put(`${PATH}/${blog2.id}`)
+        .put(`${FULL_PATH.BLOGS}/${blog2.id}`)
         .set('Authorization', validAuth)
         .send(blogDto.update)
         .expect(HttpStatus.NO_CONTENT);
 
       const response = await request(app)
-        .get(`${PATH}/${blog2.id}`)
+        .get(`${FULL_PATH.BLOGS}/${blog2.id}`)
         .expect(HttpStatus.OK);
 
       expect(response.body).toMatchObject(blogDto.update);
     });
   });
 
-  describe(`DELETE ${PATH}/:id`, () => {
+  describe(`DELETE ${FULL_PATH.BLOGS}/:id`, () => {
     it('should return 404 when no blog', async () => {
       await request(app)
-        .delete(`${PATH}/${validMongoId}`)
+        .delete(`${FULL_PATH.BLOGS}/${validMongoId}`)
         .set('Authorization', validAuth)
         .expect(HttpStatus.NOT_FOUND);
     });
@@ -161,7 +164,7 @@ describe('BlogsController (e2e)', () => {
       const [, blog2] = await createBlogs(2, app);
 
       await request(app)
-        .delete(`${PATH}/${blog2.id}`)
+        .delete(`${FULL_PATH.BLOGS}/${blog2.id}`)
         .set('Authorization', validAuth)
         .expect(HttpStatus.NO_CONTENT);
     });
@@ -175,10 +178,10 @@ describe('BlogsController (e2e)', () => {
         'TypeScript 5.0 представляет множество улучшений производительности и новые возможности...',
     };
 
-    describe(`POST ${PATH}/:id/posts`, () => {
+    describe(`POST ${FULL_PATH.BLOGS}/:id/posts`, () => {
       it('should return 400 if not exist blog', async () => {
         await request(app)
-          .post(`${PATH}/${validMongoId}/posts`)
+          .post(`${FULL_PATH.BLOGS}/${validMongoId}/posts`)
           .set('Authorization', validAuth)
           .send(newPost)
           .expect(HttpStatus.NOT_FOUND);
@@ -187,7 +190,7 @@ describe('BlogsController (e2e)', () => {
       it('should create', async () => {
         const blog = await createBlog(app);
         const response = await request(app)
-          .post(`${PATH}/${blog.id}/posts`)
+          .post(`${FULL_PATH.BLOGS}/${blog.id}/posts`)
           .set('Authorization', validAuth)
           .send(newPost)
           .expect(HttpStatus.CREATED);
@@ -200,10 +203,10 @@ describe('BlogsController (e2e)', () => {
       });
     });
 
-    describe(`GET ${PATH}/:id/posts`, () => {
+    describe(`GET ${FULL_PATH.BLOGS}/:id/posts`, () => {
       it('should return 404 if not exist blog', async () => {
         await request(app)
-          .get(`${PATH}/${validMongoId}/posts`)
+          .get(`${FULL_PATH.BLOGS}/${validMongoId}/posts`)
           .set('Authorization', validAuth)
           .expect(HttpStatus.NOT_FOUND);
       });
@@ -211,7 +214,7 @@ describe('BlogsController (e2e)', () => {
       it('should return Paginated<[]> when no posts', async () => {
         const blog = await createBlog(app);
         const response = await request(app)
-          .get(`${PATH}/${blog.id}/posts`)
+          .get(`${FULL_PATH.BLOGS}/${blog.id}/posts`)
           .expect(HttpStatus.OK);
 
         expect(response.body).toEqual({
@@ -227,29 +230,29 @@ describe('BlogsController (e2e)', () => {
         const [blog, blog2] = await createBlogs(2, app);
 
         await request(app)
-          .post(`${PATH}/${blog.id}/posts`)
+          .post(`${FULL_PATH.BLOGS}/${blog.id}/posts`)
           .set('Authorization', validAuth)
           .send(newPost)
           .expect(HttpStatus.CREATED);
         await request(app)
-          .post(`${PATH}/${blog2.id}/posts`)
+          .post(`${FULL_PATH.BLOGS}/${blog2.id}/posts`)
           .set('Authorization', validAuth)
           .send(newPost)
           .expect(HttpStatus.CREATED);
         await request(app)
-          .post(`${PATH}/${blog.id}/posts`)
+          .post(`${FULL_PATH.BLOGS}/${blog.id}/posts`)
           .set('Authorization', validAuth)
           .send(newPost)
           .expect(HttpStatus.CREATED);
 
         const response = await request(app)
-          .get(`${PATH}/${blog.id}/posts`)
+          .get(`${FULL_PATH.BLOGS}/${blog.id}/posts`)
           .expect(HttpStatus.OK);
 
         expect(response.body.items.length).toBe(2);
 
         const response2 = await request(app)
-          .get(`${PATH}/${blog2.id}/posts`)
+          .get(`${FULL_PATH.BLOGS}/${blog2.id}/posts`)
           .expect(HttpStatus.OK);
 
         expect(response2.body.items.length).toBe(1);
