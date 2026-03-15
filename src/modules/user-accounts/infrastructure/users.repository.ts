@@ -38,14 +38,27 @@ export class UsersRepository {
   findByLoginOrEmail(loginOrEmail: string): Promise<UserDocument | null> {
     return this.UserModel.findOne({
       $or: [{ login: loginOrEmail }, { email: loginOrEmail }],
-    });
+    }).where({ deletedAt: null });
   }
 
   findByLogin(login: string): Promise<UserDocument | null> {
-    return this.UserModel.findOne({ login });
+    return this.UserModel.findOne({ login }).where({ deletedAt: null });
   }
 
   findByEmail(email: string): Promise<UserDocument | null> {
-    return this.UserModel.findOne({ email });
+    return this.UserModel.findOne({ email }).where({ deletedAt: null });
+  }
+
+  findByEmailConfirmationCode(code: string): Promise<UserDocument | null> {
+    return this.UserModel.findOne({
+      'emailConfirmation.confirmationCode': code,
+    }).where({ deletedAt: null });
+  }
+
+  findByRecoveryCode(code: string): Promise<UserDocument | null> {
+    return this.UserModel.findOne({
+      'recovery.code': code,
+      'recovery.expirationDate': { $gt: new Date() },
+    }).where({ deletedAt: null });
   }
 }

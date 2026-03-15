@@ -26,8 +26,8 @@ export class User {
   @Prop({ type: EmailConfirmationSchema })
   emailConfirmation: EmailConfirmation;
 
-  @Prop({ type: RecoverySchema })
-  recovery: Recovery;
+  @Prop({ type: RecoverySchema, nullable: true, default: null })
+  recovery: Recovery | null;
 
   static createInstance(dto: CreateUserDomainDto): UserDocument {
     const user = new this();
@@ -35,6 +35,11 @@ export class User {
     user.login = dto.login;
     user.email = dto.email;
     user.passwordHash = dto.passwordHash;
+    user.emailConfirmation = {
+      expirationDate: new Date(Date.now() + 3.6e6),
+      confirmationCode: crypto.randomUUID(),
+      isConfirmed: false,
+    };
 
     return user as UserDocument;
   }
@@ -45,6 +50,34 @@ export class User {
     }
 
     this.deletedAt = new Date();
+  }
+
+  confirm() {
+    if (this.emailConfirmation.isConfirmed) {
+      throw new Error('Entity already confirmed');
+    }
+
+    if (this.emailConfirmation.expirationDate.valueOf() < Date.now()) {
+      throw new Error('Entity confirmation expired');
+    }
+
+    this.emailConfirmation.isConfirmed = true;
+  }
+
+  updateEmailConfirmation() {
+    if (this.emailConfirmation.isConfirmed) {
+      throw new Error('Entity already confirmed');
+    }
+
+    this.emailConfirmation.expirationDate = new Date(Date.now() + 3.6e6);
+    this.emailConfirmation.confirmationCode = crypto.randomUUID();
+  }
+
+  createRecovery() {
+    this.recovery = {
+      expirationDate: new Date(Date.now() + 3.6e6),
+      code: crypto.randomUUID(),
+    };
   }
 }
 

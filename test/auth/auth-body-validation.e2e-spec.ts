@@ -68,7 +68,7 @@ describe('Auth API body validation', () => {
     );
   });
 
-  describe.skip(`POST ${FULL_PATH.NEW_PASSWORD}`, () => {
+  describe(`POST ${FULL_PATH.NEW_PASSWORD}`, () => {
     const newPassword = {
       recoveryCode: 'ask-rest-com',
       newPassword: 'some#Strict@pass',
@@ -76,16 +76,16 @@ describe('Auth API body validation', () => {
 
     it.each`
       field             | value                      | message
-      ${'recoveryCode'} | ${null}                    | ${'recoveryCode should be string'}
-      ${'recoveryCode'} | ${5}                       | ${'recoveryCode should be string'}
-      ${'recoveryCode'} | ${''}                      | ${'Length of recoveryCode should be between 1 and Infinity'}
-      ${'recoveryCode'} | ${'   '}                   | ${'Length of recoveryCode should be between 1 and Infinity'}
-      ${'newPassword'}  | ${null}                    | ${'newPassword should be string'}
-      ${'newPassword'}  | ${5}                       | ${'newPassword should be string'}
-      ${'newPassword'}  | ${''}                      | ${'Length of newPassword should be between 6 and 20'}
-      ${'newPassword'}  | ${'   '}                   | ${'Length of newPassword should be between 6 and 20'}
-      ${'newPassword'}  | ${'somew'}                 | ${'Length of newPassword should be between 6 and 20'}
-      ${'newPassword'}  | ${'someVeryLongPassworda'} | ${'Length of newPassword should be between 6 and 20'}
+      ${'recoveryCode'} | ${null}                    | ${'recoveryCode must be a UUID; Received value: null'}
+      ${'recoveryCode'} | ${5}                       | ${'recoveryCode must be a UUID; Received value: 5'}
+      ${'recoveryCode'} | ${''}                      | ${'recoveryCode must be a UUID; Received value: '}
+      ${'recoveryCode'} | ${'   '}                   | ${'recoveryCode must be a UUID; Received value:    '}
+      ${'newPassword'}  | ${null}                    | ${'newPassword must be a string; Received value: null'}
+      ${'newPassword'}  | ${5}                       | ${'newPassword must be a string; Received value: 5'}
+      ${'newPassword'}  | ${''}                      | ${'newPassword must be longer than or equal to 6 characters; Received value: '}
+      ${'newPassword'}  | ${'   '}                   | ${'newPassword must be longer than or equal to 6 characters; Received value: '}
+      ${'newPassword'}  | ${'somew'}                 | ${'newPassword must be longer than or equal to 6 characters; Received value: somew'}
+      ${'newPassword'}  | ${'someVeryLongPassworda'} | ${'newPassword must be shorter than or equal to 20 characters; Received value: someVeryLongPassworda'}
     `(
       'should throw 400: field = $field, value = $value, message = $message',
       async ({ field, value, message }) => {

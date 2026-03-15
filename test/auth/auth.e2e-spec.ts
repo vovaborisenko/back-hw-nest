@@ -237,7 +237,7 @@ describe('Auth Controller (e2e)', () => {
       const { user, token } = await createUserAndLogin(app);
 
       // @ts-ignore
-      expect(JwtService.decode(token)?.userId).toBe(user.id);
+      expect(new JwtService().decode(token)?.id).toBe(user.id);
     });
   });
 

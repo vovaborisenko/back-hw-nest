@@ -3,13 +3,22 @@ import { UsersRepository } from '../infrastructure/users.repository';
 import { BcryptService } from './bcrypt.service';
 import { JwtService } from '@nestjs/jwt';
 import { UserContextDto } from '../guards/dto/user-context.dto';
+import { EmailService } from '../../notifications/email.service';
+import { CreateUserDto } from '../dto/create-user.dto';
+import { UsersService } from './users.service';
+import { RegistrationConfirmationDto } from '../dto/registration-confirmation.dto';
+import { DomainException } from '../../../core/exceptions/domain-exceptions';
+import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-code';
+import { RegistrationEmailResendingDto } from '../dto/registration-email-resending.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
+    private readonly usersService: UsersService,
     private readonly usersRepository: UsersRepository,
     private readonly jwtService: JwtService,
     private readonly bcryptService: BcryptService,
+    private readonly emailService: EmailService,
   ) {}
 
   async login(userId: string): Promise<{ accessToken: string }> {
@@ -40,106 +49,59 @@ export class AuthService {
     return { id: user._id.toString() };
   }
 
-  // async registration(
-  //   dto: RegistrationDto,
-  // ): Promise<Result<null, ResultStatus.Success | ResultStatus.BadRequest>> {
-  //   const result = await this.usersService.create(dto);
-  //
-  //   if (result.status !== ResultStatus.Success) {
-  //     return result;
-  //   }
-  //
-  //   this.emailService
-  //     .sendEmail(
-  //       dto.email,
-  //       this.emailManager.emailConfirmation(
-  //         result.data.user.emailConfirmation.confirmationCode,
-  //       ),
-  //       'Confirm email',
-  //     )
-  //     .catch((error) => console.warn(error));
-  //
-  //   return {
-  //     status: ResultStatus.Success,
-  //     extensions: [],
-  //     data: null,
-  //   };
-  // }
-  //
-  // async resendConfirmationCode(
-  //   dto: RegistrationEmailResendingDto,
-  // ): Promise<
-  //   Result<
-  //     null,
-  //     ResultStatus.Success | ResultStatus.BadRequest | ResultStatus.ServerError
-  //   >
-  // > {
-  //   const userDocument = await this.usersRepository.findByEmail(dto.email);
-  //
-  //   if (!userDocument || userDocument.emailConfirmation.isConfirmed) {
-  //     return {
-  //       status: ResultStatus.BadRequest,
-  //       extensions: [{ field: 'email', message: 'email is already confirmed' }],
-  //       data: null,
-  //     };
-  //   }
-  //
-  //   userDocument.emailConfirmation =
-  //     this.usersService.generateEmailConfirmationData();
-  //
-  //   this.emailService
-  //     .sendEmail(
-  //       dto.email,
-  //       this.emailManager.emailConfirmation(
-  //         userDocument.emailConfirmation.confirmationCode,
-  //       ),
-  //       'Confirm email',
-  //     )
-  //     .catch((error) => console.warn(error));
-  //
-  //   await this.usersRepository.save(userDocument);
-  //
-  //   return {
-  //     status: ResultStatus.Success,
-  //     extensions: [],
-  //     data: null,
-  //   };
-  // }
-  //
-  // async confirmCode(
-  //   dto: RegistrationConfirmationDto,
-  // ): Promise<
-  //   Result<
-  //     null,
-  //     ResultStatus.Success | ResultStatus.BadRequest | ResultStatus.ServerError
-  //   >
-  // > {
-  //   const userDocument = await this.usersRepository.findByEmailConfirmationCode(
-  //     dto.code,
-  //   );
-  //
-  //   if (
-  //     !userDocument ||
-  //     userDocument.emailConfirmation.isConfirmed ||
-  //     userDocument.emailConfirmation.expirationDate.valueOf() < Date.now()
-  //   ) {
-  //     return {
-  //       status: ResultStatus.BadRequest,
-  //       extensions: [{ field: 'code', message: 'code is invalid' }],
-  //       data: null,
-  //     };
-  //   }
-  //
-  //   userDocument.emailConfirmation.isConfirmed = true;
-  //
-  //   await this.usersRepository.save(userDocument);
-  //
-  //   return {
-  //     status: ResultStatus.Success,
-  //     extensions: [],
-  //     data: null,
-  //   };
-  // }
+  async registration(dto: CreateUserDto): Promise<void> {
+    const user = await this.usersService.createUser(dto);
+
+    this.emailService
+      .sendConfirmationEmail(
+        user.email,
+        user.emailConfirmation.confirmationCode,
+      )
+      .catch((error) => console.warn(error));
+  }
+
+  async resendConfirmationCode(
+    dto: RegistrationEmailResendingDto,
+  ): Promise<void> {
+    const user = await this.usersRepository.findByEmail(dto.email);
+
+    try {
+      user!.updateEmailConfirmation();
+    } catch {
+      throw new DomainException({
+        code: DomainExceptionCode.BadRequest,
+        message: 'Invalid email',
+        extensions: [{ field: 'email', message: 'Email is not valid' }],
+      });
+    }
+
+    await this.usersRepository.save(user!);
+
+    this.emailService
+      .sendConfirmationEmail(
+        user!.email,
+        user!.emailConfirmation.confirmationCode,
+      )
+      .catch((error) => console.warn(error));
+  }
+
+  async confirmCode(dto: RegistrationConfirmationDto): Promise<void> {
+    const user = await this.usersRepository.findByEmailConfirmationCode(
+      dto.code,
+    );
+
+    try {
+      user!.confirm();
+    } catch {
+      throw new DomainException({
+        code: DomainExceptionCode.BadRequest,
+        message: 'Invalid code',
+        extensions: [{ field: 'code', message: 'Code is not valid' }],
+      });
+    }
+
+    await this.usersRepository.save(user!);
+  }
   //
   // async regenerateTokens({
   //   deviceId,

@@ -12,6 +12,8 @@ import { AuthService } from './application/auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { LocalStrategy } from './guards/local/local.strategy';
 import { JwtStrategy } from './guards/bearer/jwt.strategy';
+import { PasswordService } from './application/password.service';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
@@ -22,6 +24,7 @@ import { JwtStrategy } from './guards/bearer/jwt.strategy';
       },
     }),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    NotificationsModule,
   ],
   controllers: [UsersController, AuthController],
   providers: [
@@ -33,6 +36,7 @@ import { JwtStrategy } from './guards/bearer/jwt.strategy';
     UsersRepository,
     UsersQueryRepository,
     BcryptService,
+    PasswordService,
   ],
 })
 export class UserAccountsModule {}
