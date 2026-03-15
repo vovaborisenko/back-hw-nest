@@ -45,13 +45,14 @@ export class DomainHttpExceptionsFilter implements ExceptionFilter {
 
   private buildResponseBody(
     exception: DomainException,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     requestUrl: string,
   ): ErrorResponseBody {
     return {
-      timestamp: new Date().toISOString(),
-      path: requestUrl,
-      message: exception.message,
-      code: exception.code,
+      // timestamp: new Date().toISOString(),
+      // path: requestUrl,
+      // message: exception.message,
+      // code: exception.code,
       errorsMessages: exception.extensions,
     };
   }

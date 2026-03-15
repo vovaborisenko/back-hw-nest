@@ -160,6 +160,82 @@ describe('UsersController (e2e)', () => {
           });
         });
       });
+
+      it('pageSize=15&pageNumber=1&searchLoginTerm=seR&searchEmailTerm=.com&sortDirection=asc&sortBy=login', async () => {
+        await Promise.all(
+          [
+            {
+              password: '719c3d7103f94086fb6',
+              login: 'user01',
+              email: 'email1p@gg.cm',
+            },
+            {
+              password: '719c3d7103f94086fbb',
+              login: 'user02',
+              email: 'email1p@gg.com',
+            },
+            {
+              password: '71ac3d7103f94086fc0',
+              login: 'user05',
+              email: 'email1p@gg.coi',
+            },
+            {
+              password: '71ac3d7103f94086fc5',
+              login: 'user03',
+              email: 'email1p@gg.cou',
+            },
+            {
+              password: '71ac3d7103f94086fca',
+              login: 'useee01',
+              email: 'email1p@gg.col',
+            },
+            {
+              password: '71ac3d7103f94086fcf',
+              login: 'log01',
+              email: 'emai@gg.com',
+            },
+            {
+              password: '71bc3d7103f94086fd4',
+              login: 'log02',
+              email: 'email2p@g.com',
+            },
+            {
+              password: '71bc3d7103f94086fd9',
+              login: 'loSer',
+              email: 'email2p@gg.om',
+            },
+            {
+              password: '71bc3d7103f94086fde',
+              login: 'uer15',
+              email: 'emarrr1@gg.com',
+            },
+            {
+              password: '71bc3d7103f94086fe3',
+              login: 'usr-1-01',
+              email: 'email3@gg.com',
+            },
+            {
+              password: '71cc3d7103f94086fe8',
+              login: 'some01',
+              email: 'email1@gyyyg.ru',
+            },
+            {
+              password: '71cc3d7103f94086fed',
+              login: 'use4406',
+              email: 'email1@grrg.ro',
+            },
+          ].map(async (dto) => await createUser(app, dto)),
+        );
+
+        const response = await request(app)
+          .get(
+            `${FULL_PATH.USERS}?pageSize=15&pageNumber=1&searchLoginTerm=seR&searchEmailTerm=.com&sortDirection=asc&sortBy=login`,
+          )
+          .set('Authorization', validAuth)
+          .expect(HttpStatus.OK);
+
+        expect(response.body.totalCount).toBe(11);
+      });
     });
   });
 

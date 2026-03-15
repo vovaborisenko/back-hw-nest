@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import type { ErrorResponseBody } from './error-response-body';
-import { DomainExceptionCode } from '../domain-exception-code';
+// import { DomainExceptionCode } from '../domain-exception-code';
 
 //Все ошибки
 @Catch()
@@ -23,7 +23,9 @@ export class AllHttpExceptionsFilter implements ExceptionFilter {
   }
 
   private buildResponseBody(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     requestUrl: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     message: string,
   ): ErrorResponseBody {
     //TODO: Replace with getter from configService. will be in the following lessons
@@ -31,20 +33,20 @@ export class AllHttpExceptionsFilter implements ExceptionFilter {
 
     if (isProduction) {
       return {
-        timestamp: new Date().toISOString(),
-        path: null,
-        message: 'Some error occurred',
+        // timestamp: new Date().toISOString(),
+        // path: null,
+        // message: 'Some error occurred',
         errorsMessages: [],
-        code: DomainExceptionCode.InternalServerError,
+        // code: DomainExceptionCode.InternalServerError,
       };
     }
 
     return {
-      timestamp: new Date().toISOString(),
-      path: requestUrl,
-      message,
+      // timestamp: new Date().toISOString(),
+      // path: requestUrl,
+      // message,
       errorsMessages: [],
-      code: DomainExceptionCode.InternalServerError,
+      // code: DomainExceptionCode.InternalServerError,
     };
   }
 }
