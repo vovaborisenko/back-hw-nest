@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { UsersRepository } from '../infrastructure/users.repository';
 import { BcryptService } from './bcrypt.service';
 import { JwtService } from '@nestjs/jwt';
@@ -10,21 +10,30 @@ import { RegistrationConfirmationDto } from '../dto/registration-confirmation.dt
 import { DomainException } from '../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-code';
 import { RegistrationEmailResendingDto } from '../dto/registration-email-resending.dto';
+import { INJECT_TOKEN } from '../constants/inject-token';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly usersRepository: UsersRepository,
-    private readonly jwtService: JwtService,
+    @Inject(INJECT_TOKEN.ACCESS)
+    private readonly accessTokenContext: JwtService,
+    @Inject(INJECT_TOKEN.ACCESS)
+    private readonly refreshTokenContext: JwtService,
     private readonly bcryptService: BcryptService,
     private readonly emailService: EmailService,
   ) {}
 
-  async login(userId: string): Promise<{ accessToken: string }> {
-    const accessToken = await this.jwtService.signAsync({ id: userId });
+  async login(
+    userId: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    const accessToken = await this.accessTokenContext.signAsync({ id: userId });
+    const refreshToken = await this.refreshTokenContext.signAsync({
+      id: userId,
+    });
 
-    return { accessToken };
+    return { accessToken, refreshToken };
   }
 
   async checkCredentials(
