@@ -6,8 +6,7 @@ import { invalidAuth, validAuth, validMongoId } from '../constants/common';
 import { createUser, createUsers, userDto } from '../utils/user/user.util';
 import { AppModule } from '../../src/app.module';
 import { appSetup } from '../../src/setup/app.setup';
-
-const PATH = '/api/users';
+import { FULL_PATH } from '../../src/core/constants/paths';
 
 describe('UsersController (e2e)', () => {
   let nestApp: INestApplication<App>;
@@ -33,15 +32,15 @@ describe('UsersController (e2e)', () => {
 
   beforeEach(async () => {
     await request(app)
-      .delete('/api/testing/all-data')
+      .delete(FULL_PATH.TESTING_ALL)
       .expect(HttpStatus.NO_CONTENT);
   });
 
-  it.skip.each`
-    path            | method
-    ${PATH}         | ${'get'}
-    ${PATH}         | ${'post'}
-    ${PATH + '/12'} | ${'delete'}
+  it.each`
+    path                       | method
+    ${FULL_PATH.USERS}         | ${'get'}
+    ${FULL_PATH.USERS}         | ${'post'}
+    ${FULL_PATH.USERS + '/12'} | ${'delete'}
   `(
     'should return 401 when invalid header Authorization: [$method] $path',
     async ({
@@ -59,7 +58,7 @@ describe('UsersController (e2e)', () => {
     },
   );
 
-  describe(`POST ${PATH}`, () => {
+  describe(`POST ${FULL_PATH.USERS}`, () => {
     it('should create', async () => {
       const user = await createUser(app, userDto.create[0]);
 
@@ -71,7 +70,7 @@ describe('UsersController (e2e)', () => {
       });
     });
 
-    it.skip.each`
+    it.each`
       field
       ${'login'}
       ${'email'}
@@ -79,7 +78,7 @@ describe('UsersController (e2e)', () => {
       await createUser(app, userDto.create[0]);
 
       const response = await request(app)
-        .post(PATH)
+        .post(FULL_PATH.USERS)
         .set('Authorization', validAuth)
         .send({
           ...userDto.create[1],
@@ -97,10 +96,10 @@ describe('UsersController (e2e)', () => {
     });
   });
 
-  describe(`GET ${PATH}`, () => {
+  describe(`GET ${FULL_PATH.USERS}`, () => {
     it('should return items: [] when no users', async () => {
       const response = await request(app)
-        .get(PATH)
+        .get(FULL_PATH.USERS)
         .set('Authorization', validAuth)
         .expect(HttpStatus.OK);
 
@@ -121,7 +120,7 @@ describe('UsersController (e2e)', () => {
       describe('pagination', () => {
         it('default', async () => {
           const response = await request(app)
-            .get(PATH)
+            .get(FULL_PATH.USERS)
             .set('Authorization', validAuth)
             .expect(HttpStatus.OK);
 
@@ -135,7 +134,7 @@ describe('UsersController (e2e)', () => {
 
         it('pageSize', async () => {
           const response = await request(app)
-            .get(`${PATH}?pageSize=1`)
+            .get(`${FULL_PATH.USERS}?pageSize=1`)
             .set('Authorization', validAuth)
             .expect(HttpStatus.OK);
 
@@ -149,7 +148,7 @@ describe('UsersController (e2e)', () => {
 
         it('pageSize = 99', async () => {
           const response = await request(app)
-            .get(`${PATH}?pageSize=99`)
+            .get(`${FULL_PATH.USERS}?pageSize=99`)
             .set('Authorization', validAuth)
             .expect(HttpStatus.OK);
 
@@ -161,20 +160,96 @@ describe('UsersController (e2e)', () => {
           });
         });
       });
+
+      it('pageSize=15&pageNumber=1&searchLoginTerm=seR&searchEmailTerm=.com&sortDirection=asc&sortBy=login', async () => {
+        await Promise.all(
+          [
+            {
+              password: '719c3d7103f94086fb6',
+              login: 'user01',
+              email: 'email1p@gg.cm',
+            },
+            {
+              password: '719c3d7103f94086fbb',
+              login: 'user02',
+              email: 'email1p@gg.com',
+            },
+            {
+              password: '71ac3d7103f94086fc0',
+              login: 'user05',
+              email: 'email1p@gg.coi',
+            },
+            {
+              password: '71ac3d7103f94086fc5',
+              login: 'user03',
+              email: 'email1p@gg.cou',
+            },
+            {
+              password: '71ac3d7103f94086fca',
+              login: 'useee01',
+              email: 'email1p@gg.col',
+            },
+            {
+              password: '71ac3d7103f94086fcf',
+              login: 'log01',
+              email: 'emai@gg.com',
+            },
+            {
+              password: '71bc3d7103f94086fd4',
+              login: 'log02',
+              email: 'email2p@g.com',
+            },
+            {
+              password: '71bc3d7103f94086fd9',
+              login: 'loSer',
+              email: 'email2p@gg.om',
+            },
+            {
+              password: '71bc3d7103f94086fde',
+              login: 'uer15',
+              email: 'emarrr1@gg.com',
+            },
+            {
+              password: '71bc3d7103f94086fe3',
+              login: 'usr-1-01',
+              email: 'email3@gg.com',
+            },
+            {
+              password: '71cc3d7103f94086fe8',
+              login: 'some01',
+              email: 'email1@gyyyg.ru',
+            },
+            {
+              password: '71cc3d7103f94086fed',
+              login: 'use4406',
+              email: 'email1@grrg.ro',
+            },
+          ].map(async (dto) => await createUser(app, dto)),
+        );
+
+        const response = await request(app)
+          .get(
+            `${FULL_PATH.USERS}?pageSize=15&pageNumber=1&searchLoginTerm=seR&searchEmailTerm=.com&sortDirection=asc&sortBy=login`,
+          )
+          .set('Authorization', validAuth)
+          .expect(HttpStatus.OK);
+
+        expect(response.body.totalCount).toBe(11);
+      });
     });
   });
 
-  describe(`DELETE ${PATH}/:id`, () => {
-    it.skip('should return 400 when invalid id', async () => {
+  describe(`DELETE ${FULL_PATH.USER}`, () => {
+    it('should return 400 when invalid id', async () => {
       await request(app)
-        .delete(`${PATH}/someinvalidid`)
+        .delete(`${FULL_PATH.USERS}/someinvalidid`)
         .set('Authorization', validAuth)
         .expect(HttpStatus.BAD_REQUEST);
     });
 
     it('should return 404 when no user', async () => {
       await request(app)
-        .delete(`${PATH}/${validMongoId}`)
+        .delete(`${FULL_PATH.USERS}/${validMongoId}`)
         .set('Authorization', validAuth)
         .expect(HttpStatus.NOT_FOUND);
     });
@@ -183,7 +258,7 @@ describe('UsersController (e2e)', () => {
       const [, user2] = await createUsers(2, app);
 
       await request(app)
-        .delete(`${PATH}/${user2.id}`)
+        .delete(`${FULL_PATH.USERS}/${user2.id}`)
         .set('Authorization', validAuth)
         .expect(HttpStatus.NO_CONTENT);
     });

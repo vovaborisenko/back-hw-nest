@@ -5,6 +5,7 @@ import { validAuth } from '../../constants/common';
 import { extractCookies } from '../cookies/cookies';
 import { UserViewDto } from '../../../src/modules/user-accounts/api/view-dto/users.view-dto';
 import { CreateUserInputDto } from '../../../src/modules/user-accounts/api/input-dto/users.input-dto';
+import { FULL_PATH } from '../../../src/core/constants/paths';
 
 export const userDto: { create: CreateUserInputDto[] } = {
   create: [
@@ -47,7 +48,7 @@ export async function createUser(
   dto: CreateUserInputDto = userDto.create[0],
 ): Promise<UserViewDto> {
   const { body: user } = await request(app)
-    .post('/api/users')
+    .post(FULL_PATH.USERS)
     .set('Authorization', validAuth)
     .send(dto)
     .expect(HttpStatus.CREATED);
@@ -77,7 +78,7 @@ export async function loginUser(
   userAgent: string = USER_AGENTS[0],
 ): Promise<{ token: string; refreshToken: string }> {
   const response = await request(app)
-    .post(`/api/login`)
+    .post(FULL_PATH.LOGIN)
     .set('User-Agent', userAgent)
     .send({
       loginOrEmail: dto.login,

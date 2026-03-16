@@ -8,15 +8,22 @@ import {
   Param,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from '../application/users.service';
-import type { CreateUserInputDto } from './input-dto/users.input-dto';
+import { CreateUserInputDto } from './input-dto/users.input-dto';
 import { UsersQueryRepository } from '../infrastructure/users.query-repository';
 import type { UserViewDto } from './view-dto/users.view-dto';
 import { GetUsersQueryParamsInputDto } from './input-dto/get-users.query-params.input-dto';
 import { BasePaginatedViewDto } from '../../../core/api/view-dto/base.paginated.view-dto';
+import { BasePathParamsInputDto } from '../../../core/api/input-dto/base.path-params.input-dto';
+import { BasicAuthGuard } from '../guards/basic/basic-auth.guard';
+import { PARAM, PATH } from '../../../core/constants/paths';
 
-@Controller('users')
+const { PREFIX, SINGLE } = PATH.USERS;
+
+@UseGuards(BasicAuthGuard)
+@Controller(PREFIX)
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
@@ -33,14 +40,14 @@ export class UsersController {
 
   @Post()
   async createUser(@Body() body: CreateUserInputDto): Promise<UserViewDto> {
-    const userId = await this.usersService.createUser(body);
+    const user = await this.usersService.createUser(body);
 
-    return this.usersQueryRepository.getByIdOrNotFountFail(userId);
+    return this.usersQueryRepository.getByIdOrNotFountFail(user._id);
   }
 
-  @Delete(':id')
+  @Delete(SINGLE)
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteUser(@Param('id') id: string) {
-    await this.usersService.deleteUser(id);
+  async deleteUser(@Param() params: BasePathParamsInputDto) {
+    await this.usersService.deleteUser(params[PARAM.ID]);
   }
 }

@@ -21,9 +21,7 @@ import { App } from 'supertest/types';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../../src/app.module';
 import { appSetup } from '../../src/setup/app.setup';
-// import { LikeStatus } from '../../../src/likes/types/like';
-
-const PATH = '/api/posts';
+import { FULL_PATH } from '../../src/core/constants/paths';
 
 describe('Posts API', () => {
   let nestApp: INestApplication<App>;
@@ -49,15 +47,15 @@ describe('Posts API', () => {
 
   beforeEach(async () => {
     await request(app)
-      .delete('/api/testing/all-data')
+      .delete(FULL_PATH.TESTING_ALL)
       .expect(HttpStatus.NO_CONTENT);
   });
 
   it.skip.each`
-    path            | method
-    ${PATH}         | ${'post'}
-    ${PATH + '/12'} | ${'put'}
-    ${PATH + '/12'} | ${'delete'}
+    path                       | method
+    ${FULL_PATH.POSTS}         | ${'post'}
+    ${FULL_PATH.POSTS + '/12'} | ${'put'}
+    ${FULL_PATH.POSTS + '/12'} | ${'delete'}
   `(
     `should return 401 when invalid header Authorization: [$method] $path`,
     async ({
@@ -75,10 +73,10 @@ describe('Posts API', () => {
     },
   );
 
-  describe(`POST ${PATH}`, () => {
+  describe(`POST ${FULL_PATH.POSTS}`, () => {
     it('should return 404 if not exist blog', async () => {
       await request(app)
-        .post(PATH)
+        .post(FULL_PATH.POSTS)
         .set('Authorization', validAuth)
         .send({ ...postDto.create, blogId: validMongoId })
         .expect(HttpStatus.NOT_FOUND);
@@ -104,9 +102,11 @@ describe('Posts API', () => {
     });
   });
 
-  describe(`GET ${PATH}`, () => {
+  describe(`GET ${FULL_PATH.POSTS}`, () => {
     it('should return Paginated<[]> when no posts', async () => {
-      const response = await request(app).get(PATH).expect(HttpStatus.OK);
+      const response = await request(app)
+        .get(FULL_PATH.POSTS)
+        .expect(HttpStatus.OK);
 
       expect(response.body).toEqual({
         items: [],
@@ -120,7 +120,9 @@ describe('Posts API', () => {
     it('should return list of posts', async () => {
       await createBlogAndHisPosts(2, app);
 
-      const response = await request(app).get(PATH).expect(HttpStatus.OK);
+      const response = await request(app)
+        .get(FULL_PATH.POSTS)
+        .expect(HttpStatus.OK);
 
       expect(response.body.items.length).toBe(2);
     });
@@ -134,7 +136,7 @@ describe('Posts API', () => {
       );
 
       const response = await request(app)
-        .get(`${PATH}?sortBy=blogName`)
+        .get(`${FULL_PATH.POSTS}?sortBy=blogName`)
         .expect(HttpStatus.OK);
 
       const blogNames = response.body.items.map(({ blogName }) => blogName);
@@ -144,10 +146,10 @@ describe('Posts API', () => {
     });
   });
 
-  describe(`GET ${PATH}/:id`, () => {
+  describe(`GET ${FULL_PATH.POSTS}/:id`, () => {
     it('should return 404 when no post', async () => {
       await request(app)
-        .get(`${PATH}/${validMongoId}`)
+        .get(`${FULL_PATH.POSTS}/${validMongoId}`)
         .expect(HttpStatus.NOT_FOUND);
     });
 
@@ -155,18 +157,18 @@ describe('Posts API', () => {
       const [, posts] = await createBlogAndHisPosts(2, app);
 
       const response = await request(app)
-        .get(`${PATH}/${posts[1].id}`)
+        .get(`${FULL_PATH.POSTS}/${posts[1].id}`)
         .expect(HttpStatus.OK);
 
       expect(response.body).toEqual(posts[1]);
     });
   });
 
-  describe(`PUT ${PATH}/:id`, () => {
+  describe(`PUT ${FULL_PATH.POSTS}/:id`, () => {
     it('should return 404 when no post', async () => {
       const blog = await createBlog(app);
       await request(app)
-        .put(`${PATH}/${validMongoId}`)
+        .put(`${FULL_PATH.POSTS}/${validMongoId}`)
         .set('Authorization', validAuth)
         .send({ ...postDto.update, blogId: blog.id })
         .expect(HttpStatus.NOT_FOUND);
@@ -176,7 +178,7 @@ describe('Posts API', () => {
       const [, post] = await createBlogAndHisPost(app);
 
       await request(app)
-        .put(`${PATH}/${post.id}`)
+        .put(`${FULL_PATH.POSTS}/${post.id}`)
         .set('Authorization', validAuth)
         .send({ ...postDto.create, blogId: validMongoId })
         .expect(HttpStatus.NOT_FOUND);
@@ -187,29 +189,29 @@ describe('Posts API', () => {
       const editedPost = { ...postDto.update, blogId: blog.id };
 
       await request(app)
-        .put(`${PATH}/${post1.id}`)
+        .put(`${FULL_PATH.POSTS}/${post1.id}`)
         .set('Authorization', validAuth)
         .send({ ...editedPost, title: 'updated title' })
         .expect(HttpStatus.NO_CONTENT);
       await request(app)
-        .put(`${PATH}/${post2.id}`)
+        .put(`${FULL_PATH.POSTS}/${post2.id}`)
         .set('Authorization', validAuth)
         .send(editedPost)
         .expect(HttpStatus.NO_CONTENT);
 
       const response = await request(app)
-        .get(`${PATH}/${post2.id}`)
+        .get(`${FULL_PATH.POSTS}/${post2.id}`)
         .expect(HttpStatus.OK);
 
       expect(response.body).toMatchObject(editedPost);
     });
   });
 
-  describe.skip(`PUT ${PATH}/:id/like-status`, () => {
+  describe.skip(`PUT ${FULL_PATH.POSTS}/:id/like-status`, () => {
     it('should return 404 when no post', async () => {
       const { token } = await createUserAndLogin(app);
       await request(app)
-        .put(`${PATH}/${validMongoId}/like-status`)
+        .put(`${FULL_PATH.POSTS}/${validMongoId}/like-status`)
         .set('Authorization', `Bearer ${token}`)
         // .send(commentDto.updateLikeStatus[0])
         .expect(HttpStatus.NOT_FOUND);
@@ -220,13 +222,13 @@ describe('Posts API', () => {
       const { token, user } = await createUserAndLogin(app);
 
       await request(app)
-        .put(`${PATH}/${post.id}/like-status`)
+        .put(`${FULL_PATH.POSTS}/${post.id}/like-status`)
         .set('Authorization', `Bearer ${token}`)
         // .send(commentDto.updateLikeStatus[0])
         .expect(HttpStatus.NO_CONTENT);
 
       const response = await request(app)
-        .get(`${PATH}/${post.id}`)
+        .get(`${FULL_PATH.POSTS}/${post.id}`)
         .set('Authorization', `Bearer ${token}`)
         .expect(HttpStatus.OK);
 
@@ -247,13 +249,13 @@ describe('Posts API', () => {
       });
 
       await request(app)
-        .put(`${PATH}/${post.id}/like-status`)
+        .put(`${FULL_PATH.POSTS}/${post.id}/like-status`)
         .set('Authorization', `Bearer ${token}`)
         // .send(commentDto.updateLikeStatus[1])
         .expect(HttpStatus.NO_CONTENT);
 
       const responseAfterDislike = await request(app)
-        .get(`${PATH}/${post.id}`)
+        .get(`${FULL_PATH.POSTS}/${post.id}`)
         .set('Authorization', `Bearer ${token}`)
         .expect(HttpStatus.OK);
 
@@ -275,13 +277,13 @@ describe('Posts API', () => {
       for (let i = 0; i < createdUsers.length; i++) {
         const { user, token } = createdUsers[i];
         await request(app)
-          .put(`${PATH}/${post.id}/like-status`)
+          .put(`${FULL_PATH.POSTS}/${post.id}/like-status`)
           .set('Authorization', `Bearer ${token}`)
           // .send(commentDto.updateLikeStatus[0])
           .expect(HttpStatus.NO_CONTENT);
 
         const response = await request(app)
-          .get(`${PATH}/${post.id}`)
+          .get(`${FULL_PATH.POSTS}/${post.id}`)
           .set('Authorization', `Bearer ${token}`)
           .expect(HttpStatus.OK);
 
@@ -303,7 +305,7 @@ describe('Posts API', () => {
         expect(response.body.extendedLikesInfo).toEqual(expectedLikeInfo);
 
         const responseUnauth = await request(app)
-          .get(`${PATH}/${post.id}`)
+          .get(`${FULL_PATH.POSTS}/${post.id}`)
           .expect(HttpStatus.OK);
 
         expect(responseUnauth.body.extendedLikesInfo).toEqual({
@@ -315,13 +317,13 @@ describe('Posts API', () => {
       for (let i = 0; i < createdUsers.length; i++) {
         const { user, token } = createdUsers[i];
         await request(app)
-          .put(`${PATH}/${post.id}/like-status`)
+          .put(`${FULL_PATH.POSTS}/${post.id}/like-status`)
           .set('Authorization', `Bearer ${token}`)
           // .send(commentDto.updateLikeStatus[1])
           .expect(HttpStatus.NO_CONTENT);
 
         const response = await request(app)
-          .get(`${PATH}/${post.id}`)
+          .get(`${FULL_PATH.POSTS}/${post.id}`)
           .set('Authorization', `Bearer ${token}`)
           .expect(HttpStatus.OK);
 
@@ -337,7 +339,7 @@ describe('Posts API', () => {
         });
 
         const responseUnauth = await request(app)
-          .get(`${PATH}/${post.id}`)
+          .get(`${FULL_PATH.POSTS}/${post.id}`)
           .expect(HttpStatus.OK);
 
         expect(responseUnauth.body.extendedLikesInfo).toEqual({
@@ -349,13 +351,13 @@ describe('Posts API', () => {
       for (let i = 3; i < createdUsers.length; i++) {
         const { token } = createdUsers[i];
         await request(app)
-          .put(`${PATH}/${post.id}/like-status`)
+          .put(`${FULL_PATH.POSTS}/${post.id}/like-status`)
           .set('Authorization', `Bearer ${token}`)
           // .send(commentDto.updateLikeStatus[2])
           .expect(HttpStatus.NO_CONTENT);
 
         const response = await request(app)
-          .get(`${PATH}/${post.id}`)
+          .get(`${FULL_PATH.POSTS}/${post.id}`)
           .set('Authorization', `Bearer ${token}`)
           .expect(HttpStatus.OK);
 
@@ -366,7 +368,7 @@ describe('Posts API', () => {
         });
 
         const responseUnauth = await request(app)
-          .get(`${PATH}/${post.id}`)
+          .get(`${FULL_PATH.POSTS}/${post.id}`)
           .expect(HttpStatus.OK);
 
         expect(responseUnauth.body.extendedLikesInfo).toEqual({
@@ -377,10 +379,10 @@ describe('Posts API', () => {
     });
   });
 
-  describe(`DELETE ${PATH}/:id`, () => {
+  describe(`DELETE ${FULL_PATH.POSTS}/:id`, () => {
     it('should return 404 when no post', async () => {
       await request(app)
-        .delete(`${PATH}/${validMongoId}`)
+        .delete(`${FULL_PATH.POSTS}/${validMongoId}`)
         .set('Authorization', validAuth)
         .expect(HttpStatus.NOT_FOUND);
     });
@@ -389,17 +391,17 @@ describe('Posts API', () => {
       const [, [, post2]] = await createBlogAndHisPosts(2, app);
 
       await request(app)
-        .delete(`${PATH}/${post2.id}`)
+        .delete(`${FULL_PATH.POSTS}/${post2.id}`)
         .set('Authorization', validAuth)
         .expect(HttpStatus.NO_CONTENT);
     });
   });
 
-  describe.skip(`POST ${PATH}/:id/comments`, () => {
+  describe.skip(`POST ${FULL_PATH.POSTS}/:id/comments`, () => {
     it('should return 401 when no accessToken', async () => {
       const [, post] = await createBlogAndHisPost(app);
       await request(app)
-        .post(`${PATH}/${post.id}/comments`)
+        .post(`${FULL_PATH.POSTS}/${post.id}/comments`)
         .expect(HttpStatus.UNAUTHORIZED);
     });
 
@@ -407,11 +409,11 @@ describe('Posts API', () => {
       const { token } = await createUserAndLogin(app);
       const [, post] = await createBlogAndHisPost(app);
       await request(app)
-        .delete(`${PATH}/${post.id}`)
+        .delete(`${FULL_PATH.POSTS}/${post.id}`)
         .set('Authorization', validAuth)
         .expect(HttpStatus.NO_CONTENT);
       await request(app)
-        .post(`${PATH}/${post.id}/comments`)
+        .post(`${FULL_PATH.POSTS}/${post.id}/comments`)
         .set('Authorization', `Bearer ${token}`)
         // .send(commentDto.create)
         .expect(HttpStatus.NOT_FOUND);
@@ -437,22 +439,22 @@ describe('Posts API', () => {
     // });
   });
 
-  describe.skip(`GET ${PATH}/:id/comments`, () => {
+  describe.skip(`GET ${FULL_PATH.POSTS}/:id/comments`, () => {
     it('should return 404 when no post whit that id', async () => {
       const [, post] = await createBlogAndHisPost(app);
       await request(app)
-        .delete(`${PATH}/${post.id}`)
+        .delete(`${FULL_PATH.POSTS}/${post.id}`)
         .set('Authorization', validAuth)
         .expect(HttpStatus.NO_CONTENT);
       await request(app)
-        .get(`${PATH}/${post.id}/comments`)
+        .get(`${FULL_PATH.POSTS}/${post.id}/comments`)
         .expect(HttpStatus.NOT_FOUND);
     });
 
     it('should return Paginated<[]> when no comments', async () => {
       const [, post] = await createBlogAndHisPost(app);
       const response = await request(app)
-        .get(`${PATH}/${post.id}/comments`)
+        .get(`${FULL_PATH.POSTS}/${post.id}/comments`)
         .expect(HttpStatus.OK);
 
       expect(response.body).toEqual({
@@ -468,7 +470,7 @@ describe('Posts API', () => {
     //   const [, post] = await createComments(2, app);
     //
     //   const response = await request(app)
-    //     .get(`${PATH}/${post.id}/comments`)
+    //     .get(`${FULL_PATH.POSTS}/${post.id}/comments`)
     //     .expect(HttpStatus.OK);
     //
     //   expect(response.body.items.length).toBe(2);

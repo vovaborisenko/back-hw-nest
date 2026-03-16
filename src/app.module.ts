@@ -5,6 +5,9 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserAccountsModule } from './modules/user-accounts/user-accounts.module';
 import { BloggersPlatformModule } from './modules/bloggers-platform/bloggers-platform.module';
+import { APP_FILTER } from '@nestjs/core';
+import { AllHttpExceptionsFilter } from './core/exceptions/filters/all-exseptions.filter';
+import { DomainHttpExceptionsFilter } from './core/exceptions/filters/domain-exceptions.filter';
 
 @Module({
   imports: [
@@ -17,6 +20,16 @@ import { BloggersPlatformModule } from './modules/bloggers-platform/bloggers-pla
     BloggersPlatformModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_FILTER,
+      useClass: AllHttpExceptionsFilter,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: DomainHttpExceptionsFilter,
+    },
+  ],
 })
 export class AppModule {}

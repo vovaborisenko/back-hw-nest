@@ -1,11 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { QueryFilter, Types } from 'mongoose';
-import { User } from '../domain/user.entity';
 import type { UserDocument, UserModelType } from '../domain/user.entity';
+import { User } from '../domain/user.entity';
 import { UserViewDto } from '../api/view-dto/users.view-dto';
 import { GetUsersQueryParamsInputDto } from '../api/input-dto/get-users.query-params.input-dto';
 import { BasePaginatedViewDto } from '../../../core/api/view-dto/base.paginated.view-dto';
+import { DomainException } from '../../../core/exceptions/domain-exceptions';
+import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-code';
+import { MeViewDto } from '../api/view-dto/me.view-dto';
 
 @Injectable()
 export class UsersQueryRepository {
@@ -17,13 +20,29 @@ export class UsersQueryRepository {
     return this.UserModel.findById(id).where({ deletedAt: null });
   }
 
+  async getMeOrFail(id: string | Types.ObjectId): Promise<MeViewDto> {
+    const user = await this.findById(id);
+
+    if (!user) {
+      throw new DomainException({
+        code: DomainExceptionCode.Unauthorized,
+        message: 'User not found',
+      });
+    }
+
+    return MeViewDto.mapToView(user);
+  }
+
   async getByIdOrNotFountFail(
     id: string | Types.ObjectId,
   ): Promise<UserViewDto> {
     const user = await this.findById(id);
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new DomainException({
+        code: DomainExceptionCode.NotFound,
+        message: 'User not found',
+      });
     }
 
     return UserViewDto.mapToView(user);
@@ -32,7 +51,7 @@ export class UsersQueryRepository {
   async getAll(
     query: GetUsersQueryParamsInputDto,
   ): Promise<BasePaginatedViewDto<UserViewDto[]>> {
-    const skip = query.calculateSkip();
+    const skip = query.skip;
     const sort = {
       [query.sortBy]: query.sortDirection,
       _id: query.sortDirection,

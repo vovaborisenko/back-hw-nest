@@ -1,11 +1,13 @@
 import { QueryFilter, Types } from 'mongoose';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Blog, BlogDocument } from '../domain/blog.entity';
 import type { BlogModelType } from '../domain/blog.entity';
 import { BlogViewDto } from '../api/view-dto/blog.view-dto';
 import { BasePaginatedViewDto } from '../../../../core/api/view-dto/base.paginated.view-dto';
 import { GetBlogsQueryParamsInputDto } from '../api/input-dto/get-blogs.query-params.input-dto';
+import { DomainException } from '../../../../core/exceptions/domain-exceptions';
+import { DomainExceptionCode } from '../../../../core/exceptions/domain-exception-code';
 
 @Injectable()
 export class BlogsQueryRepository {
@@ -14,7 +16,7 @@ export class BlogsQueryRepository {
   async getAll(
     query: GetBlogsQueryParamsInputDto,
   ): Promise<BasePaginatedViewDto<BlogViewDto[]>> {
-    const skip = query.calculateSkip();
+    const skip = query.skip;
     const sort = {
       [query.sortBy]: query.sortDirection,
       _id: query.sortDirection,
@@ -54,7 +56,10 @@ export class BlogsQueryRepository {
     const blog = await this.findById(id);
 
     if (!blog) {
-      throw new NotFoundException('Blog not found');
+      throw new DomainException({
+        code: DomainExceptionCode.NotFound,
+        message: 'Blog not found',
+      });
     }
 
     return BlogViewDto.mapToView(blog);

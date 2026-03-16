@@ -1,11 +1,9 @@
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
+import { pipesSetup } from './pipes.setup';
+import { PATH } from '../core/constants/paths';
 
 export function appSetup(app: INestApplication) {
   app.enableCors();
-  app.useGlobalPipes(
-    new ValidationPipe({
-      transform: true,
-    }),
-  );
-  app.setGlobalPrefix('api');
+  pipesSetup(app);
+  app.setGlobalPrefix(PATH.PREFIX);
 }

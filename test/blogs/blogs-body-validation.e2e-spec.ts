@@ -33,7 +33,7 @@ describe.skip('Blogs API body validation', () => {
 
   beforeEach(async () => {
     await request(app)
-      .delete('/api/testing/all-data')
+      .delete(FULL_PATH.TESTING_ALL)
       .expect(HttpStatus.NO_CONTENT);
   });
 
