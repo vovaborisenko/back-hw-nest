@@ -1,4 +1,4 @@
-import { PostDocument } from '../../domain/post.entity';
+import { AggregatedPostDto } from '../../infrastructure/dto/post.aggregated-dto';
 
 export class PostViewDto {
   id: string;
@@ -15,7 +15,7 @@ export class PostViewDto {
     newestLikes: never[];
   };
 
-  static mapToView(post: PostDocument) {
+  static mapToView(post: AggregatedPostDto) {
     const dto = new PostViewDto();
 
     const newestLikes = []; // post.newestLikes.map((like) => ({
@@ -28,8 +28,8 @@ export class PostViewDto {
     dto.title = post.title;
     dto.shortDescription = post.shortDescription;
     dto.content = post.content;
-    dto.blogId = post.blog!._id.toString();
-    dto.blogName = 'name' in post.blog! ? post.blog.name : null;
+    dto.blogId = post.blog._id.toString();
+    dto.blogName = 'name' in post.blog ? post.blog.name : null;
     dto.createdAt = post.createdAt.toISOString();
     dto.extendedLikesInfo = {
       dislikesCount: 0, //post.dislikesCount,
