@@ -44,7 +44,7 @@ export class PostsQueryRepository {
       [this.getSortBy(query.sortBy)]: query.sortDirection,
       _id: query.sortDirection,
     };
-    const filter: QueryFilter<PostDocument> = {};
+    const filter: QueryFilter<PostDocument> = { deletedAt: null };
 
     if (options?.blogId) {
       filter.blog = new Types.ObjectId(options.blogId);

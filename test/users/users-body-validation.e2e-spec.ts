@@ -39,26 +39,26 @@ describe('Users API body validation', () => {
   describe(`POST ${FULL_PATH.USERS}`, () => {
     it.each`
       field         | value             | message
-      ${'login'}    | ${null}           | ${'login must be a string; Received value: null'}
-      ${'login'}    | ${5}              | ${'login must be a string; Received value: 5'}
-      ${'login'}    | ${''}             | ${'login must be longer than or equal to 3 characters; Received value: '}
-      ${'login'}    | ${'   '}          | ${'login must be longer than or equal to 3 characters; Received value: '}
-      ${'login'}    | ${'ar '}          | ${'login must be longer than or equal to 3 characters; Received value: ar'}
-      ${'login'}    | ${'ar-23_ZvtV45'} | ${'login must be shorter than or equal to 10 characters; Received value: ar-23_ZvtV45'}
-      ${'login'}    | ${'ar-23+vtV'}    | ${'login must match /^[a-z0-9_-]*$/i regular expression; Received value: ar-23+vtV'}
-      ${'email'}    | ${null}           | ${'email must be a string; Received value: null'}
-      ${'email'}    | ${5}              | ${'email must be a string; Received value: 5'}
-      ${'email'}    | ${''}             | ${'email must be longer than or equal to 5 characters; Received value: '}
-      ${'email'}    | ${'   '}          | ${'email must be longer than or equal to 5 characters; Received value: '}
-      ${'email'}    | ${'w@w.s'}        | ${'email must match /^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$/i regular expression; Received value: w@w.s'}
-      ${'email'}    | ${'w$@w.s_u'}     | ${'email must match /^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$/i regular expression; Received value: w$@w.s_u'}
-      ${'email'}    | ${'ar-23_ZvfrtV'} | ${'email must match /^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$/i regular expression; Received value: ar-23_ZvfrtV'}
-      ${'password'} | ${null}           | ${'password must be a string; Received value: null'}
-      ${'password'} | ${5}              | ${'password must be a string; Received value: 5'}
-      ${'password'} | ${''}             | ${'password must be longer than or equal to 6 characters; Received value: '}
-      ${'password'} | ${'   '}          | ${'password must be longer than or equal to 6 characters; Received value: '}
-      ${'password'} | ${' dfe@#  '}     | ${'password must be longer than or equal to 6 characters; Received value: dfe@#'}
-      ${'password'} | ${longPassword}   | ${'password must be shorter than or equal to 20 characters; Received value: asff-awf+asws@ASDf$f#'}
+      ${'login'}    | ${null}           | ${'login must be a string'}
+      ${'login'}    | ${5}              | ${'login must be a string'}
+      ${'login'}    | ${''}             | ${'login must be longer than or equal to 3 characters'}
+      ${'login'}    | ${'   '}          | ${'login must be longer than or equal to 3 characters'}
+      ${'login'}    | ${'ar '}          | ${'login must be longer than or equal to 3 characters'}
+      ${'login'}    | ${'ar-23_ZvtV45'} | ${'login must be shorter than or equal to 10 characters'}
+      ${'login'}    | ${'ar-23+vtV'}    | ${'login must match /^[a-z0-9_-]*$/i regular expression'}
+      ${'email'}    | ${null}           | ${'email must be a string'}
+      ${'email'}    | ${5}              | ${'email must be a string'}
+      ${'email'}    | ${''}             | ${'email must be longer than or equal to 5 characters'}
+      ${'email'}    | ${'   '}          | ${'email must be longer than or equal to 5 characters'}
+      ${'email'}    | ${'w@w.s'}        | ${'email must match /^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$/i regular expression'}
+      ${'email'}    | ${'w$@w.s_u'}     | ${'email must match /^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$/i regular expression'}
+      ${'email'}    | ${'ar-23_ZvfrtV'} | ${'email must match /^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$/i regular expression'}
+      ${'password'} | ${null}           | ${'password must be a string'}
+      ${'password'} | ${5}              | ${'password must be a string'}
+      ${'password'} | ${''}             | ${'password must be longer than or equal to 6 characters'}
+      ${'password'} | ${'   '}          | ${'password must be longer than or equal to 6 characters'}
+      ${'password'} | ${' dfe@#  '}     | ${'password must be longer than or equal to 6 characters'}
+      ${'password'} | ${longPassword}   | ${'password must be shorter than or equal to 20 characters'}
     `(
       'should throw 400: field = $field, value = $value, message = $message',
       async ({ field, value, message }) => {

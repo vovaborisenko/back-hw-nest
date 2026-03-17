@@ -43,12 +43,12 @@ describe('Auth API body validation', () => {
   describe.skip(`POST ${FULL_PATH.LOGIN}`, () => {
     it.each`
       field             | value    | message
-      ${'loginOrEmail'} | ${null}  | ${'loginOrEmail should be string'}
-      ${'loginOrEmail'} | ${5}     | ${'loginOrEmail should be string'}
+      ${'loginOrEmail'} | ${null}  | ${'loginOrEmail must be a string'}
+      ${'loginOrEmail'} | ${5}     | ${'loginOrEmail must be a string'}
       ${'loginOrEmail'} | ${''}    | ${'Length of loginOrEmail should be between 1 and Infinity'}
       ${'loginOrEmail'} | ${'   '} | ${'Length of loginOrEmail should be between 1 and Infinity'}
-      ${'password'}     | ${null}  | ${'password should be string'}
-      ${'password'}     | ${5}     | ${'password should be string'}
+      ${'password'}     | ${null}  | ${'password must be a string'}
+      ${'password'}     | ${5}     | ${'password must be a string'}
       ${'password'}     | ${''}    | ${'Length of password should be between 1 and Infinity'}
       ${'password'}     | ${'   '} | ${'Length of password should be between 1 and Infinity'}
     `(
@@ -76,16 +76,16 @@ describe('Auth API body validation', () => {
 
     it.each`
       field             | value                      | message
-      ${'recoveryCode'} | ${null}                    | ${'recoveryCode must be a UUID; Received value: null'}
-      ${'recoveryCode'} | ${5}                       | ${'recoveryCode must be a UUID; Received value: 5'}
-      ${'recoveryCode'} | ${''}                      | ${'recoveryCode must be a UUID; Received value: '}
-      ${'recoveryCode'} | ${'   '}                   | ${'recoveryCode must be a UUID; Received value:    '}
-      ${'newPassword'}  | ${null}                    | ${'newPassword must be a string; Received value: null'}
-      ${'newPassword'}  | ${5}                       | ${'newPassword must be a string; Received value: 5'}
-      ${'newPassword'}  | ${''}                      | ${'newPassword must be longer than or equal to 6 characters; Received value: '}
-      ${'newPassword'}  | ${'   '}                   | ${'newPassword must be longer than or equal to 6 characters; Received value: '}
-      ${'newPassword'}  | ${'somew'}                 | ${'newPassword must be longer than or equal to 6 characters; Received value: somew'}
-      ${'newPassword'}  | ${'someVeryLongPassworda'} | ${'newPassword must be shorter than or equal to 20 characters; Received value: someVeryLongPassworda'}
+      ${'recoveryCode'} | ${null}                    | ${'recoveryCode must be a UUID'}
+      ${'recoveryCode'} | ${5}                       | ${'recoveryCode must be a UUID'}
+      ${'recoveryCode'} | ${''}                      | ${'recoveryCode must be a UUID'}
+      ${'recoveryCode'} | ${'   '}                   | ${'recoveryCode must be a UUID'}
+      ${'newPassword'}  | ${null}                    | ${'newPassword must be a string'}
+      ${'newPassword'}  | ${5}                       | ${'newPassword must be a string'}
+      ${'newPassword'}  | ${''}                      | ${'newPassword must be longer than or equal to 6 characters'}
+      ${'newPassword'}  | ${'   '}                   | ${'newPassword must be longer than or equal to 6 characters'}
+      ${'newPassword'}  | ${'somew'}                 | ${'newPassword must be longer than or equal to 6 characters'}
+      ${'newPassword'}  | ${'someVeryLongPassworda'} | ${'newPassword must be shorter than or equal to 20 characters'}
     `(
       'should throw 400: field = $field, value = $value, message = $message',
       async ({ field, value, message }) => {
@@ -110,11 +110,11 @@ describe('Auth API body validation', () => {
 
     it.each`
       field      | value             | message
-      ${'email'} | ${5}              | ${'email must be a string; Received value: 5'}
-      ${'email'} | ${''}             | ${'email must be longer than or equal to 5 characters; Received value: '}
-      ${'email'} | ${'   '}          | ${'email must be longer than or equal to 5 characters; Received value: '}
-      ${'email'} | ${'w$@w.s_u'}     | ${'email must match /^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$/i regular expression; Received value: w$@w.s_u'}
-      ${'email'} | ${'ar-23_ZvfrtV'} | ${'email must match /^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$/i regular expression; Received value: ar-23_ZvfrtV'}
+      ${'email'} | ${5}              | ${'email must be a string'}
+      ${'email'} | ${''}             | ${'email must be longer than or equal to 5 characters'}
+      ${'email'} | ${'   '}          | ${'email must be longer than or equal to 5 characters'}
+      ${'email'} | ${'w$@w.s_u'}     | ${'email must match /^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$/i regular expression'}
+      ${'email'} | ${'ar-23_ZvfrtV'} | ${'email must match /^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$/i regular expression'}
     `(
       'should throw 400: field = $field, value = $value, message = $message',
       async ({ field, value, message }) => {

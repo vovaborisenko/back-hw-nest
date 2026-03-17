@@ -22,6 +22,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../../src/app.module';
 import { appSetup } from '../../src/setup/app.setup';
 import { FULL_PATH } from '../../src/core/constants/paths';
+import {
+  commentDto,
+  createComment,
+  createComments,
+} from '../utils/comment/comment.util';
 
 describe('Posts API', () => {
   let nestApp: INestApplication<App>;
@@ -51,7 +56,7 @@ describe('Posts API', () => {
       .expect(HttpStatus.NO_CONTENT);
   });
 
-  it.skip.each`
+  it.each`
     path                       | method
     ${FULL_PATH.POSTS}         | ${'post'}
     ${FULL_PATH.POSTS + '/12'} | ${'put'}
@@ -397,7 +402,7 @@ describe('Posts API', () => {
     });
   });
 
-  describe.skip(`POST ${FULL_PATH.POSTS}/:id/comments`, () => {
+  describe(`POST ${FULL_PATH.POSTS}/:id/comments`, () => {
     it('should return 401 when no accessToken', async () => {
       const [, post] = await createBlogAndHisPost(app);
       await request(app)
@@ -415,31 +420,31 @@ describe('Posts API', () => {
       await request(app)
         .post(`${FULL_PATH.POSTS}/${post.id}/comments`)
         .set('Authorization', `Bearer ${token}`)
-        // .send(commentDto.create)
+        .send(commentDto.create)
         .expect(HttpStatus.NOT_FOUND);
     });
 
-    // it('should create comment', async () => {
-    //   const [comment, , , user] = await createComment(app, commentDto.create);
-    //
-    //   expect(comment).toEqual({
-    //     ...commentDto.create,
-    //     commentatorInfo: {
-    //       userId: user.id,
-    //       userLogin: user.login,
-    //     },
-    //     id: expect.any(String),
-    //     createdAt: expect.any(String),
-    //     likesInfo: {
-    //       dislikesCount: 0,
-    //       likesCount: 0,
-    //       myStatus: LikeStatus.None,
-    //     },
-    //   });
-    // });
+    it('should create comment', async () => {
+      const [comment, , , user] = await createComment(app, commentDto.create);
+
+      expect(comment).toEqual({
+        ...commentDto.create,
+        commentatorInfo: {
+          userId: user.id,
+          userLogin: user.login,
+        },
+        id: expect.any(String),
+        createdAt: expect.any(String),
+        likesInfo: {
+          dislikesCount: 0,
+          likesCount: 0,
+          myStatus: 'None',
+        },
+      });
+    });
   });
 
-  describe.skip(`GET ${FULL_PATH.POSTS}/:id/comments`, () => {
+  describe(`GET ${FULL_PATH.POSTS}/:id/comments`, () => {
     it('should return 404 when no post whit that id', async () => {
       const [, post] = await createBlogAndHisPost(app);
       await request(app)
@@ -466,20 +471,20 @@ describe('Posts API', () => {
       });
     });
 
-    // it('should return list of comments', async () => {
-    //   const [, post] = await createComments(2, app);
-    //
-    //   const response = await request(app)
-    //     .get(`${FULL_PATH.POSTS}/${post.id}/comments`)
-    //     .expect(HttpStatus.OK);
-    //
-    //   expect(response.body.items.length).toBe(2);
-    //   expect(response.body).toMatchObject({
-    //     page: 1,
-    //     pageSize: 10,
-    //     pagesCount: 1,
-    //     totalCount: 2,
-    //   });
-    // });
+    it('should return list of comments', async () => {
+      const [, post] = await createComments(2, app);
+
+      const response = await request(app)
+        .get(`${FULL_PATH.POSTS}/${post.id}/comments`)
+        .expect(HttpStatus.OK);
+
+      expect(response.body.items.length).toBe(2);
+      expect(response.body).toMatchObject({
+        page: 1,
+        pageSize: 10,
+        pagesCount: 1,
+        totalCount: 2,
+      });
+    });
   });
 });

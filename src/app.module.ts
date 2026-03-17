@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { CqrsModule } from '@nestjs/cqrs';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
@@ -11,6 +12,7 @@ import { DomainHttpExceptionsFilter } from './core/exceptions/filters/domain-exc
 
 @Module({
   imports: [
+    CqrsModule.forRoot(),
     ConfigModule.forRoot(),
     MongooseModule.forRoot(
       process.env.MONGO_URL || 'mongodb://localhost:27017/incubator-hw',

@@ -6,10 +6,9 @@ import { App } from 'supertest/types';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../../src/app.module';
 import { appSetup } from '../../src/setup/app.setup';
+import { FULL_PATH } from '../../src/core/constants/paths';
 
-const PATH = '/api/blogs';
-
-describe.skip('Blogs API body validation', () => {
+describe('Blogs API body validation', () => {
   let nestApp: INestApplication<App>;
   let app: App;
 
@@ -37,29 +36,29 @@ describe.skip('Blogs API body validation', () => {
       .expect(HttpStatus.NO_CONTENT);
   });
 
-  describe(`POST ${PATH}`, () => {
+  describe(`POST ${FULL_PATH.BLOGS}`, () => {
     it.each`
       field            | value              | message
-      ${'name'}        | ${null}            | ${'name should be string'}
-      ${'name'}        | ${5}               | ${'name should be string'}
-      ${'name'}        | ${''}              | ${'Length of name should be between 1 and 15'}
-      ${'name'}        | ${'    '}          | ${'Length of name should be between 1 and 15'}
-      ${'name'}        | ${'4'.repeat(16)}  | ${'Length of name should be between 1 and 15'}
-      ${'description'} | ${null}            | ${'description should be string'}
-      ${'description'} | ${5}               | ${'description should be string'}
-      ${'description'} | ${''}              | ${'Length of description should be between 1 and 500'}
-      ${'description'} | ${'    '}          | ${'Length of description should be between 1 and 500'}
-      ${'description'} | ${'4'.repeat(501)} | ${'Length of description should be between 1 and 500'}
-      ${'websiteUrl'}  | ${null}            | ${'websiteUrl should be string'}
-      ${'websiteUrl'}  | ${5}               | ${'websiteUrl should be string'}
-      ${'websiteUrl'}  | ${''}              | ${'Length of websiteUrl should be between 1 and 100'}
-      ${'websiteUrl'}  | ${'    '}          | ${'Length of websiteUrl should be between 1 and 100'}
-      ${'websiteUrl'}  | ${'4'.repeat(101)} | ${'Length of websiteUrl should be between 1 and 100'}
+      ${'name'}        | ${null}            | ${'name must be a string'}
+      ${'name'}        | ${5}               | ${'name must be a string'}
+      ${'name'}        | ${''}              | ${'name must be longer than or equal to 1 characters'}
+      ${'name'}        | ${'    '}          | ${'name must be longer than or equal to 1 characters'}
+      ${'name'}        | ${'4'.repeat(16)}  | ${'name must be shorter than or equal to 15 characters'}
+      ${'description'} | ${null}            | ${'description must be a string'}
+      ${'description'} | ${5}               | ${'description must be a string'}
+      ${'description'} | ${''}              | ${'description must be longer than or equal to 1 characters'}
+      ${'description'} | ${'    '}          | ${'description must be longer than or equal to 1 characters'}
+      ${'description'} | ${'4'.repeat(501)} | ${'description must be shorter than or equal to 500 characters'}
+      ${'websiteUrl'}  | ${null}            | ${'websiteUrl must be a string'}
+      ${'websiteUrl'}  | ${5}               | ${'websiteUrl must be a string'}
+      ${'websiteUrl'}  | ${''}              | ${'websiteUrl must be longer than or equal to 1 characters'}
+      ${'websiteUrl'}  | ${'    '}          | ${'websiteUrl must be longer than or equal to 1 characters'}
+      ${'websiteUrl'}  | ${'4'.repeat(101)} | ${'websiteUrl must be shorter than or equal to 100 characters'}
     `(
       'should throw 400: field = $field, value = $value, message = $message',
       async ({ field, value, message }) => {
         const response = await request(app)
-          .post(PATH)
+          .post(FULL_PATH.BLOGS)
           .set('Authorization', validAuth)
           .send({ ...blogDto.create, [field]: value })
           .expect(HttpStatus.BAD_REQUEST);
@@ -73,31 +72,28 @@ describe.skip('Blogs API body validation', () => {
     );
   });
 
-  describe(`PUT ${PATH}/:id`, () => {
+  describe(`PUT ${FULL_PATH.BLOGS}/:id`, () => {
     it.each`
       field            | value              | message
-      ${'name'}        | ${null}            | ${'name should be string'}
-      ${'name'}        | ${5}               | ${'name should be string'}
-      ${'name'}        | ${''}              | ${'Length of name should be between 1 and 15'}
-      ${'name'}        | ${'    '}          | ${'Length of name should be between 1 and 15'}
-      ${'name'}        | ${'4'.repeat(16)}  | ${'Length of name should be between 1 and 15'}
-      ${'description'} | ${null}            | ${'description should be string'}
-      ${'description'} | ${5}               | ${'description should be string'}
-      ${'description'} | ${''}              | ${'Length of description should be between 1 and 500'}
-      ${'description'} | ${'    '}          | ${'Length of description should be between 1 and 500'}
-      ${'description'} | ${'4'.repeat(501)} | ${'Length of description should be between 1 and 500'}
-      ${'websiteUrl'}  | ${null}            | ${'websiteUrl should be string'}
-      ${'websiteUrl'}  | ${5}               | ${'websiteUrl should be string'}
-      ${'websiteUrl'}  | ${''}              | ${'Length of websiteUrl should be between 1 and 100'}
-      ${'websiteUrl'}  | ${'    '}          | ${'Length of websiteUrl should be between 1 and 100'}
-      ${'websiteUrl'}  | ${'4'.repeat(101)} | ${'Length of websiteUrl should be between 1 and 100'}
+      ${'name'}        | ${5}               | ${'name must be a string'}
+      ${'name'}        | ${''}              | ${'name must be longer than or equal to 1 characters'}
+      ${'name'}        | ${'    '}          | ${'name must be longer than or equal to 1 characters'}
+      ${'name'}        | ${'4'.repeat(16)}  | ${'name must be shorter than or equal to 15 characters'}
+      ${'description'} | ${5}               | ${'description must be a string'}
+      ${'description'} | ${''}              | ${'description must be longer than or equal to 1 characters'}
+      ${'description'} | ${'    '}          | ${'description must be longer than or equal to 1 characters'}
+      ${'description'} | ${'4'.repeat(501)} | ${'description must be shorter than or equal to 500 characters'}
+      ${'websiteUrl'}  | ${5}               | ${'websiteUrl must be a string'}
+      ${'websiteUrl'}  | ${''}              | ${'websiteUrl must be longer than or equal to 1 characters'}
+      ${'websiteUrl'}  | ${'    '}          | ${'websiteUrl must be longer than or equal to 1 characters'}
+      ${'websiteUrl'}  | ${'4'.repeat(101)} | ${'websiteUrl must be shorter than or equal to 100 characters'}
     `(
       'should throw 400: field = $field, value = $value, message = $message',
       async ({ field, value, message }) => {
         const blog = await createBlog(app);
 
         const response = await request(app)
-          .put(`${PATH}/${blog.id}`)
+          .put(`${FULL_PATH.BLOGS}/${blog.id}`)
           .set('Authorization', validAuth)
           .send({ ...blogDto.update, [field]: value })
           .expect(HttpStatus.BAD_REQUEST);

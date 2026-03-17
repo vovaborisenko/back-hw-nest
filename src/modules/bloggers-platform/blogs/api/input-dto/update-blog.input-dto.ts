@@ -4,16 +4,16 @@ import { IsStringLengthTrim } from '../../../../../core/decorators/validation/is
 import { URL_REG_EXP } from '../../../../../core/constants/reg-exp';
 
 export class UpdateBlogInputDto implements UpdateBlogDto {
-  @IsStringLengthTrim()
+  @IsStringLengthTrim(1, 15)
   @IsOptional()
   name?: string;
 
-  @IsStringLengthTrim()
+  @IsStringLengthTrim(1, 500)
   @IsOptional()
   description?: string;
 
   @Matches(URL_REG_EXP)
-  @IsStringLengthTrim()
+  @IsStringLengthTrim(1, 100)
   @IsOptional()
   websiteUrl?: string;
 }

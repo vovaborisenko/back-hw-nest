@@ -3,7 +3,7 @@ import { validAuth } from '../constants/common';
 import { createBlogAndHisPost, postDto } from '../utils/post/post.util';
 import { createBlog } from '../utils/blog/blog.util';
 import { createUserAndLogin } from '../utils/user/user.util';
-// import { commentDto } from '../utils/comment/comment.util';
+import { commentDto } from '../utils/comment/comment.util';
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { App } from 'supertest/types';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -11,9 +11,7 @@ import { AppModule } from '../../src/app.module';
 import { appSetup } from '../../src/setup/app.setup';
 import { FULL_PATH } from '../../src/core/constants/paths';
 
-const PATH = '/api/posts';
-
-describe.skip('Posts API body validation', () => {
+describe('Posts API body validation', () => {
   let nestApp: INestApplication<App>;
   let app: App;
 
@@ -41,29 +39,29 @@ describe.skip('Posts API body validation', () => {
       .expect(HttpStatus.NO_CONTENT);
   });
 
-  describe(`POST ${PATH}`, () => {
+  describe(`POST ${FULL_PATH.POSTS}`, () => {
     it.each`
       field                 | value               | message
-      ${'title'}            | ${null}             | ${'title should be string'}
-      ${'title'}            | ${5}                | ${'title should be string'}
-      ${'title'}            | ${''}               | ${'Length of title should be between 1 and 30'}
-      ${'title'}            | ${'    '}           | ${'Length of title should be between 1 and 30'}
-      ${'title'}            | ${'4'.repeat(31)}   | ${'Length of title should be between 1 and 30'}
-      ${'shortDescription'} | ${null}             | ${'shortDescription should be string'}
-      ${'shortDescription'} | ${5}                | ${'shortDescription should be string'}
-      ${'shortDescription'} | ${''}               | ${'Length of shortDescription should be between 1 and 100'}
-      ${'shortDescription'} | ${'    '}           | ${'Length of shortDescription should be between 1 and 100'}
-      ${'shortDescription'} | ${'4'.repeat(101)}  | ${'Length of shortDescription should be between 1 and 100'}
-      ${'content'}          | ${null}             | ${'content should be string'}
-      ${'content'}          | ${5}                | ${'content should be string'}
-      ${'content'}          | ${''}               | ${'Length of content should be between 1 and 1000'}
-      ${'content'}          | ${'    '}           | ${'Length of content should be between 1 and 1000'}
-      ${'content'}          | ${'4'.repeat(1001)} | ${'Length of content should be between 1 and 1000'}
-      ${'blogId'}           | ${null}             | ${'blogId should be string'}
-      ${'blogId'}           | ${5}                | ${'blogId should be string'}
-      ${'blogId'}           | ${''}               | ${'Length of blogId should be between 1 and Infinity'}
-      ${'blogId'}           | ${'    '}           | ${'Length of blogId should be between 1 and Infinity'}
-      ${'blogId'}           | ${'dsfr'}           | ${'ID is invalid'}
+      ${'title'}            | ${null}             | ${'title must be a string'}
+      ${'title'}            | ${5}                | ${'title must be a string'}
+      ${'title'}            | ${''}               | ${'title must be longer than or equal to 1 characters'}
+      ${'title'}            | ${'    '}           | ${'title must be longer than or equal to 1 characters'}
+      ${'title'}            | ${'4'.repeat(31)}   | ${'title must be shorter than or equal to 30 characters'}
+      ${'shortDescription'} | ${null}             | ${'shortDescription must be a string'}
+      ${'shortDescription'} | ${5}                | ${'shortDescription must be a string'}
+      ${'shortDescription'} | ${''}               | ${'shortDescription must be longer than or equal to 1 characters'}
+      ${'shortDescription'} | ${'    '}           | ${'shortDescription must be longer than or equal to 1 characters'}
+      ${'shortDescription'} | ${'4'.repeat(101)}  | ${'shortDescription must be shorter than or equal to 100 characters'}
+      ${'content'}          | ${null}             | ${'content must be a string'}
+      ${'content'}          | ${5}                | ${'content must be a string'}
+      ${'content'}          | ${''}               | ${'content must be longer than or equal to 1 characters'}
+      ${'content'}          | ${'    '}           | ${'content must be longer than or equal to 1 characters'}
+      ${'content'}          | ${'4'.repeat(1001)} | ${'content must be shorter than or equal to 1000 characters'}
+      ${'blogId'}           | ${null}             | ${'blogId must be a mongodb id'}
+      ${'blogId'}           | ${5}                | ${'blogId must be a mongodb id'}
+      ${'blogId'}           | ${''}               | ${'blogId must be a mongodb id'}
+      ${'blogId'}           | ${'    '}           | ${'blogId must be a mongodb id'}
+      ${'blogId'}           | ${'dsfr'}           | ${'blogId must be a mongodb id'}
     `(
       'should throw 400: field = $field, value = $value, message = $message',
       async ({ field, value, message }) => {
@@ -86,26 +84,22 @@ describe.skip('Posts API body validation', () => {
   describe(`PUT ${FULL_PATH.POST}`, () => {
     it.each`
       field                 | value               | message
-      ${'title'}            | ${null}             | ${'title should be string'}
-      ${'title'}            | ${5}                | ${'title should be string'}
-      ${'title'}            | ${''}               | ${'Length of title should be between 1 and 30'}
-      ${'title'}            | ${'    '}           | ${'Length of title should be between 1 and 30'}
-      ${'title'}            | ${'4'.repeat(31)}   | ${'Length of title should be between 1 and 30'}
-      ${'shortDescription'} | ${null}             | ${'shortDescription should be string'}
-      ${'shortDescription'} | ${5}                | ${'shortDescription should be string'}
-      ${'shortDescription'} | ${''}               | ${'Length of shortDescription should be between 1 and 100'}
-      ${'shortDescription'} | ${'    '}           | ${'Length of shortDescription should be between 1 and 100'}
-      ${'shortDescription'} | ${'4'.repeat(101)}  | ${'Length of shortDescription should be between 1 and 100'}
-      ${'content'}          | ${null}             | ${'content should be string'}
-      ${'content'}          | ${5}                | ${'content should be string'}
-      ${'content'}          | ${''}               | ${'Length of content should be between 1 and 1000'}
-      ${'content'}          | ${'    '}           | ${'Length of content should be between 1 and 1000'}
-      ${'content'}          | ${'4'.repeat(1001)} | ${'Length of content should be between 1 and 1000'}
-      ${'blogId'}           | ${null}             | ${'blogId should be string'}
-      ${'blogId'}           | ${5}                | ${'blogId should be string'}
-      ${'blogId'}           | ${''}               | ${'Length of blogId should be between 1 and Infinity'}
-      ${'blogId'}           | ${'    '}           | ${'Length of blogId should be between 1 and Infinity'}
-      ${'blogId'}           | ${'dsfr'}           | ${'ID is invalid'}
+      ${'title'}            | ${5}                | ${'title must be a string'}
+      ${'title'}            | ${''}               | ${'title must be longer than or equal to 1 characters'}
+      ${'title'}            | ${'    '}           | ${'title must be longer than or equal to 1 characters'}
+      ${'title'}            | ${'4'.repeat(31)}   | ${'title must be shorter than or equal to 30 characters'}
+      ${'shortDescription'} | ${5}                | ${'shortDescription must be a string'}
+      ${'shortDescription'} | ${''}               | ${'shortDescription must be longer than or equal to 1 characters'}
+      ${'shortDescription'} | ${'    '}           | ${'shortDescription must be longer than or equal to 1 characters'}
+      ${'shortDescription'} | ${'4'.repeat(101)}  | ${'shortDescription must be shorter than or equal to 100 characters'}
+      ${'content'}          | ${5}                | ${'content must be a string'}
+      ${'content'}          | ${''}               | ${'content must be longer than or equal to 1 characters'}
+      ${'content'}          | ${'    '}           | ${'content must be longer than or equal to 1 characters'}
+      ${'content'}          | ${'4'.repeat(1001)} | ${'content must be shorter than or equal to 1000 characters'}
+      ${'blogId'}           | ${5}                | ${'blogId must be a mongodb id'}
+      ${'blogId'}           | ${''}               | ${'blogId must be a mongodb id'}
+      ${'blogId'}           | ${'    '}           | ${'blogId must be a mongodb id'}
+      ${'blogId'}           | ${'dsfr'}           | ${'blogId must be a mongodb id'}
     `(
       'should throw 400: field = $field, value = $value, message = $message',
       async ({ field, value, message }) => {
@@ -126,11 +120,11 @@ describe.skip('Posts API body validation', () => {
     );
   });
 
-  describe(`PUT ${PATH}/:id/like-status`, () => {
+  describe.skip(`PUT ${FULL_PATH.POSTS}/:id/like-status`, () => {
     it.each`
       field           | value        | message
-      ${'likeStatus'} | ${null}      | ${'likeStatus should be string'}
-      ${'likeStatus'} | ${5}         | ${'likeStatus should be string'}
+      ${'likeStatus'} | ${null}      | ${'likeStatus must be a string'}
+      ${'likeStatus'} | ${5}         | ${'likeStatus must be a string'}
       ${'likeStatus'} | ${''}        | ${'Should be on of None, Like, Dislike'}
       ${'likeStatus'} | ${'    '}    | ${'Should be on of None, Like, Dislike'}
       ${'likeStatus'} | ${'unknown'} | ${'Should be on of None, Like, Dislike'}
@@ -141,7 +135,7 @@ describe.skip('Posts API body validation', () => {
         const { token } = await createUserAndLogin(app);
 
         const response = await request(app)
-          .put(`${PATH}/${post.id}/like-status`)
+          .put(`${FULL_PATH.POSTS}/${post.id}/like-status`)
           .set('Authorization', `Bearer ${token}`)
           .send({ [field]: value })
           .expect(HttpStatus.BAD_REQUEST);
@@ -155,24 +149,24 @@ describe.skip('Posts API body validation', () => {
     );
   });
 
-  describe(`POST ${PATH}/:id/comments`, () => {
+  describe(`POST ${FULL_PATH.POSTS}/:id/comments`, () => {
     it.each`
       field        | value              | message
-      ${'content'} | ${null}            | ${'content should be string'}
-      ${'content'} | ${5}               | ${'content should be string'}
-      ${'content'} | ${''}              | ${'Length of content should be between 20 and 300'}
-      ${'content'} | ${'    '}          | ${'Length of content should be between 20 and 300'}
-      ${'content'} | ${'4'.repeat(19)}  | ${'Length of content should be between 20 and 300'}
-      ${'content'} | ${'l'.repeat(301)} | ${'Length of content should be between 20 and 300'}
+      ${'content'} | ${null}            | ${'content must be a string'}
+      ${'content'} | ${5}               | ${'content must be a string'}
+      ${'content'} | ${''}              | ${'content must be longer than or equal to 20 characters'}
+      ${'content'} | ${'    '}          | ${'content must be longer than or equal to 20 characters'}
+      ${'content'} | ${'4'.repeat(19)}  | ${'content must be longer than or equal to 20 characters'}
+      ${'content'} | ${'l'.repeat(301)} | ${'content must be shorter than or equal to 300 characters'}
     `(
       'should throw 400: field = $field, value = $value, message = $message',
       async ({ field, value, message }) => {
         const { token } = await createUserAndLogin(app);
         const [, post] = await createBlogAndHisPost(app);
         const response = await request(app)
-          .post(`${PATH}/${post.id}/comments`)
+          .post(`${FULL_PATH.POSTS}/${post.id}/comments`)
           .set('Authorization', `Bearer ${token}`)
-          // .send({ ...commentDto.create, [field]: value })
+          .send({ ...commentDto.create, [field]: value })
           .expect(HttpStatus.BAD_REQUEST);
 
         expect(
