@@ -1,8 +1,11 @@
-import {
-  AggregatedPostDto,
-  NewestLike,
-} from '../../infrastructure/dto/post.aggregated-dto';
+import { AggregatedPostDto } from '../../infrastructure/dto/post.aggregated-dto';
 import { LikeStatus } from '../../../likes/enums/like-status';
+
+interface NewestLike {
+  addedAt: string;
+  userId: string;
+  login: string;
+}
 
 export class PostViewDto {
   id: string;
@@ -29,7 +32,13 @@ export class PostViewDto {
     dto.blogId = post.blog._id.toString();
     dto.blogName = 'name' in post.blog ? post.blog.name : null;
     dto.createdAt = post.createdAt.toISOString();
-    dto.extendedLikesInfo = post.extendedLikesInfo;
+    dto.extendedLikesInfo = {
+      ...post.extendedLikesInfo,
+      newestLikes: post.extendedLikesInfo.newestLikes.map((like) => ({
+        ...like,
+        addedAt: like.addedAt.toISOString(),
+      })),
+    };
 
     return dto;
   }
