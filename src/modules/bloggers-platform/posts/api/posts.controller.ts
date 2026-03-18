@@ -46,12 +46,14 @@ export class PostsController {
     private readonly queryBus: QueryBus,
   ) {}
 
+  @UseGuards(JwtOptionalAuthGuard)
   @Get()
   getAll(
+    @ExtractUserIfExistsFromRequestDecorator() user: UserContextDto | null,
     @Query()
     query: GetPostsQueryParamsInputDto,
   ): Promise<BasePaginatedViewDto<PostViewDto[]>> {
-    return this.postsQueryRepository.getAll(query);
+    return this.postsQueryRepository.getAll(query, { likeAuthorId: user?.id });
   }
 
   @UseGuards(JwtOptionalAuthGuard)

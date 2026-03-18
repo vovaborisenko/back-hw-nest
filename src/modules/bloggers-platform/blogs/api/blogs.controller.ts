@@ -25,6 +25,9 @@ import { PostsQueryRepository } from '../../posts/infrastructure/posts.query-rep
 import { CreateBlogPostInputDto } from './input-dto/create-blog-post.input-dto';
 import { PATH, PARAM } from '../../../../core/constants/paths';
 import { BasicAuthGuard } from '../../../user-accounts/guards/basic/basic-auth.guard';
+import { JwtOptionalAuthGuard } from '../../../user-accounts/guards/bearer/jwt-optional-auth.guard';
+import { ExtractUserIfExistsFromRequestDecorator } from '../../../user-accounts/guards/decorators/param/extract-user-if-exists-from-request.decorator';
+import { UserContextDto } from '../../../user-accounts/guards/dto/user-context.dto';
 
 const { PREFIX, SINGLE, POSTS } = PATH.BLOGS;
 
@@ -75,15 +78,20 @@ export class BlogsController {
     await this.blogService.deleteBlog(id);
   }
 
+  @UseGuards(JwtOptionalAuthGuard)
   @Get(POSTS)
   async getBlogPosts(
     @Param(PARAM.ID) blogId: string,
+    @ExtractUserIfExistsFromRequestDecorator() user: UserContextDto | null,
     @Query()
     query: GetPostsQueryParamsInputDto,
   ): Promise<BasePaginatedViewDto<PostViewDto[]>> {
     await this.blogsQueryRepository.getByIdOrNotFoundFail(blogId);
 
-    return this.postsQueryRepository.getAll(query, { blogId });
+    return this.postsQueryRepository.getAll(query, {
+      blogId,
+      likeAuthorId: user?.id,
+    });
   }
 
   @UseGuards(BasicAuthGuard)
