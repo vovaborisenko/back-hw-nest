@@ -98,7 +98,7 @@ export class PostsController {
     @Query()
     query: GetCommentsQueryParamsInputDto,
   ): Promise<BasePaginatedViewDto<CommentViewDto[]>> {
-    return this.queryBus.execute(new GetCommentsQuery(query, postId));
+    return this.queryBus.execute(new GetCommentsQuery(query, postId, user?.id));
   }
 
   @UseGuards(JwtAuthGuard)
