@@ -1,4 +1,5 @@
 import { AggregatedCommentDto } from '../../infrastructure/dto/comment.aggregated-dto';
+import { LikeStatus } from '../../../likes/enums/like-status';
 
 export class CommentViewDto {
   id: string;
@@ -24,9 +25,9 @@ export class CommentViewDto {
       userLogin: comment.author.login,
     };
     dto.likesInfo = {
-      dislikesCount: 0,
-      likesCount: 0,
-      myStatus: 'None',
+      dislikesCount: comment.dislikesCount,
+      likesCount: comment.likesCount,
+      myStatus: comment.userLikeStatus || LikeStatus.None,
     };
     dto.createdAt = comment.createdAt.toISOString();
 

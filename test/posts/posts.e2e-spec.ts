@@ -7,11 +7,6 @@ import {
   postDto,
 } from '../utils/post/post.util';
 import { createBlog, createBlogs } from '../utils/blog/blog.util';
-// import {
-//   commentDto,
-//   createComment,
-//   createComments,
-// } from '../utils/comment/comment.util';
 import {
   createUserAndLogin,
   createUsersAndLogin,
@@ -27,6 +22,7 @@ import {
   createComment,
   createComments,
 } from '../utils/comment/comment.util';
+import { LikeStatus } from '../../src/modules/bloggers-platform/likes/enums/like-status';
 
 describe('Posts API', () => {
   let nestApp: INestApplication<App>;
@@ -212,13 +208,13 @@ describe('Posts API', () => {
     });
   });
 
-  describe.skip(`PUT ${FULL_PATH.POSTS}/:id/like-status`, () => {
+  describe(`PUT ${FULL_PATH.POSTS}/:id/like-status`, () => {
     it('should return 404 when no post', async () => {
       const { token } = await createUserAndLogin(app);
       await request(app)
         .put(`${FULL_PATH.POSTS}/${validMongoId}/like-status`)
         .set('Authorization', `Bearer ${token}`)
-        // .send(commentDto.updateLikeStatus[0])
+        .send(commentDto.updateLikeStatus[0])
         .expect(HttpStatus.NOT_FOUND);
     });
 
@@ -229,7 +225,7 @@ describe('Posts API', () => {
       await request(app)
         .put(`${FULL_PATH.POSTS}/${post.id}/like-status`)
         .set('Authorization', `Bearer ${token}`)
-        // .send(commentDto.updateLikeStatus[0])
+        .send(commentDto.updateLikeStatus[0])
         .expect(HttpStatus.NO_CONTENT);
 
       const response = await request(app)
@@ -242,7 +238,7 @@ describe('Posts API', () => {
         extendedLikesInfo: {
           ...post.extendedLikesInfo,
           likesCount: post.extendedLikesInfo.likesCount + 1,
-          // myStatus: LikeStatus.Like,
+          myStatus: LikeStatus.Like,
           newestLikes: [
             {
               addedAt: expect.any(String),
@@ -256,7 +252,7 @@ describe('Posts API', () => {
       await request(app)
         .put(`${FULL_PATH.POSTS}/${post.id}/like-status`)
         .set('Authorization', `Bearer ${token}`)
-        // .send(commentDto.updateLikeStatus[1])
+        .send(commentDto.updateLikeStatus[1])
         .expect(HttpStatus.NO_CONTENT);
 
       const responseAfterDislike = await request(app)
@@ -269,7 +265,7 @@ describe('Posts API', () => {
         extendedLikesInfo: {
           ...post.extendedLikesInfo,
           dislikesCount: post.extendedLikesInfo.dislikesCount + 1,
-          // myStatus: LikeStatus.Dislike,
+          myStatus: LikeStatus.Dislike,
         },
       });
     });
@@ -284,7 +280,7 @@ describe('Posts API', () => {
         await request(app)
           .put(`${FULL_PATH.POSTS}/${post.id}/like-status`)
           .set('Authorization', `Bearer ${token}`)
-          // .send(commentDto.updateLikeStatus[0])
+          .send(commentDto.updateLikeStatus[0])
           .expect(HttpStatus.NO_CONTENT);
 
         const response = await request(app)
@@ -304,7 +300,7 @@ describe('Posts API', () => {
         post.extendedLikesInfo.likesCount += 1;
         const expectedLikeInfo = {
           ...post.extendedLikesInfo,
-          // myStatus: LikeStatus.Like,
+          myStatus: LikeStatus.Like,
         };
 
         expect(response.body.extendedLikesInfo).toEqual(expectedLikeInfo);
@@ -315,7 +311,7 @@ describe('Posts API', () => {
 
         expect(responseUnauth.body.extendedLikesInfo).toEqual({
           ...post.extendedLikesInfo,
-          // myStatus: LikeStatus.None,
+          myStatus: LikeStatus.None,
         });
       }
       // set dislikes
@@ -324,7 +320,7 @@ describe('Posts API', () => {
         await request(app)
           .put(`${FULL_PATH.POSTS}/${post.id}/like-status`)
           .set('Authorization', `Bearer ${token}`)
-          // .send(commentDto.updateLikeStatus[1])
+          .send(commentDto.updateLikeStatus[1])
           .expect(HttpStatus.NO_CONTENT);
 
         const response = await request(app)
@@ -340,7 +336,7 @@ describe('Posts API', () => {
         post.extendedLikesInfo.dislikesCount += 1;
         expect(response.body.extendedLikesInfo).toEqual({
           ...post.extendedLikesInfo,
-          // myStatus: LikeStatus.Dislike,
+          myStatus: LikeStatus.Dislike,
         });
 
         const responseUnauth = await request(app)
@@ -349,7 +345,7 @@ describe('Posts API', () => {
 
         expect(responseUnauth.body.extendedLikesInfo).toEqual({
           ...post.extendedLikesInfo,
-          // myStatus: LikeStatus.None,
+          myStatus: LikeStatus.None,
         });
       }
       // set none
@@ -358,7 +354,7 @@ describe('Posts API', () => {
         await request(app)
           .put(`${FULL_PATH.POSTS}/${post.id}/like-status`)
           .set('Authorization', `Bearer ${token}`)
-          // .send(commentDto.updateLikeStatus[2])
+          .send(commentDto.updateLikeStatus[2])
           .expect(HttpStatus.NO_CONTENT);
 
         const response = await request(app)
@@ -369,7 +365,7 @@ describe('Posts API', () => {
         post.extendedLikesInfo.dislikesCount -= 1;
         expect(response.body.extendedLikesInfo).toEqual({
           ...post.extendedLikesInfo,
-          // myStatus: LikeStatus.None,
+          myStatus: LikeStatus.None,
         });
 
         const responseUnauth = await request(app)
@@ -378,7 +374,7 @@ describe('Posts API', () => {
 
         expect(responseUnauth.body.extendedLikesInfo).toEqual({
           ...post.extendedLikesInfo,
-          // myStatus: LikeStatus.None,
+          myStatus: LikeStatus.None,
         });
       }
     });

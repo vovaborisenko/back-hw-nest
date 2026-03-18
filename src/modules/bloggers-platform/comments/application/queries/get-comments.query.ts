@@ -12,6 +12,7 @@ export class GetCommentsQuery extends Query<
   constructor(
     public readonly query: GetCommentsQueryParamsInputDto,
     public readonly postId?: string | Types.ObjectId,
+    public readonly likeAuthorId?: string | Types.ObjectId,
   ) {
     super();
   }
@@ -27,11 +28,12 @@ export class GetCommentsQueryHandler implements IQueryHandler<GetCommentsQuery> 
   async execute({
     query,
     postId,
+    likeAuthorId,
   }: GetCommentsQuery): Promise<BasePaginatedViewDto<CommentViewDto[]>> {
     if (postId) {
       await this.postsRepository.findByIdOrNotFound(postId);
     }
 
-    return this.commentsQueryRepository.findMany(query, postId);
+    return this.commentsQueryRepository.findMany(query, postId, likeAuthorId);
   }
 }

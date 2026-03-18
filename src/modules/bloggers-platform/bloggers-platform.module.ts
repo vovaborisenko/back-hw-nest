@@ -15,12 +15,17 @@ import { Comment, CommentSchema } from './comments/domain/comment.entity';
 import { CommentsQueryRepository } from './comments/infrastructure/comments.query-repository';
 import { CommentsController } from './comments/api/comments.controller';
 import { CommentsHandlers } from './comments/application';
+import { Like, LikeSchema } from './likes/domain/like.entity';
+import { SetLikeUseCase } from './likes/application/usecases/set-like.usecase';
+import { LikesRepository } from './likes/infrastructure/likes.repository';
+import { PostsHandlers } from './posts/application';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Blog.name, schema: BlogSchema },
       { name: Comment.name, schema: CommentSchema },
+      { name: Like.name, schema: LikeSchema },
       { name: Post.name, schema: PostSchema },
     ]),
   ],
@@ -31,9 +36,12 @@ import { CommentsHandlers } from './comments/application';
     ...CommentsHandlers,
     CommentsRepository,
     CommentsQueryRepository,
+    SetLikeUseCase,
+    LikesRepository,
     PostsService,
     PostsRepository,
     PostsQueryRepository,
+    ...PostsHandlers,
   ],
   controllers: [BlogsController, CommentsController, PostsController],
 })

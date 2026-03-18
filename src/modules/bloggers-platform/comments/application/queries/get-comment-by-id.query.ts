@@ -4,7 +4,10 @@ import { CommentViewDto } from '../../api/view-dto/comment.view-dto';
 import { CommentsQueryRepository } from '../../infrastructure/comments.query-repository';
 
 export class GetCommentByIdQuery extends Query<CommentViewDto> {
-  constructor(public readonly id: string | Types.ObjectId) {
+  constructor(
+    public readonly id: string | Types.ObjectId,
+    public readonly likeAuthorId?: string | Types.ObjectId,
+  ) {
     super();
   }
 }
@@ -15,7 +18,10 @@ export class GetCommentByIdQueryHandler implements IQueryHandler<GetCommentByIdQ
     private readonly commentsQueryRepository: CommentsQueryRepository,
   ) {}
 
-  execute({ id }: GetCommentByIdQuery): Promise<CommentViewDto> {
-    return this.commentsQueryRepository.findByIdOrNotFoundFail(id);
+  execute({ id, likeAuthorId }: GetCommentByIdQuery): Promise<CommentViewDto> {
+    return this.commentsQueryRepository.findByIdOrNotFoundFail(
+      id,
+      likeAuthorId,
+    );
   }
 }

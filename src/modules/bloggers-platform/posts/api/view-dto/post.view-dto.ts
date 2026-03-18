@@ -1,4 +1,8 @@
-import { AggregatedPostDto } from '../../infrastructure/dto/post.aggregated-dto';
+import {
+  AggregatedPostDto,
+  NewestLike,
+} from '../../infrastructure/dto/post.aggregated-dto';
+import { LikeStatus } from '../../../likes/enums/like-status';
 
 export class PostViewDto {
   id: string;
@@ -11,18 +15,12 @@ export class PostViewDto {
   extendedLikesInfo: {
     dislikesCount: number;
     likesCount: number;
-    myStatus: 'None'; //post.myStatus?.status || LikeStatus.None,
-    newestLikes: never[];
+    myStatus: LikeStatus;
+    newestLikes: NewestLike[];
   };
 
   static mapToView(post: AggregatedPostDto) {
     const dto = new PostViewDto();
-
-    const newestLikes = []; // post.newestLikes.map((like) => ({
-    //   addedAt: like.createdAt?.toISOString(),
-    //   userId: like.author?._id.toString(),
-    //   login: like.author?.login,
-    // }));
 
     dto.id = post._id.toString();
     dto.title = post.title;
@@ -31,12 +29,7 @@ export class PostViewDto {
     dto.blogId = post.blog._id.toString();
     dto.blogName = 'name' in post.blog ? post.blog.name : null;
     dto.createdAt = post.createdAt.toISOString();
-    dto.extendedLikesInfo = {
-      dislikesCount: 0, //post.dislikesCount,
-      likesCount: 0, //post.likesCount,
-      myStatus: 'None', //post.myStatus?.status || LikeStatus.None,
-      newestLikes,
-    };
+    dto.extendedLikesInfo = post.extendedLikesInfo;
 
     return dto;
   }

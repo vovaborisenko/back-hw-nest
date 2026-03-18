@@ -8,13 +8,13 @@ import { PostViewDto } from '../../../src/modules/bloggers-platform/posts/api/vi
 import { FULL_PATH } from '../../../src/core/constants/paths';
 import { HttpStatus } from '@nestjs/common';
 import { UserViewDto } from '../../../src/modules/user-accounts/api/view-dto/users.view-dto';
-// import { CommentLikeStatusUpdateDto } from '../../../../src/comments/dto/comment-like-status.update-dto';
-// import { LikeStatus } from '../../../../src/likes/types/like';
+import { LikeInputDto } from '../../../src/modules/bloggers-platform/likes/api/input-dto/like.input-dto';
+import { LikeStatus } from '../../../src/modules/bloggers-platform/likes/enums/like-status';
 
 export const commentDto: {
   create: CreatePostCommentDto;
   update: UpdateCommentDto;
-  // updateLikeStatus: CommentLikeStatusUpdateDto[];
+  updateLikeStatus: LikeInputDto[];
 } = {
   create: {
     content:
@@ -24,17 +24,17 @@ export const commentDto: {
     content:
       'React 18 приносит революционные изменения в рендеринг приложений...',
   },
-  // updateLikeStatus: [
-  //   {
-  //     likeStatus: LikeStatus.Like,
-  //   },
-  //   {
-  //     likeStatus: LikeStatus.Dislike,
-  //   },
-  //   {
-  //     likeStatus: LikeStatus.None,
-  //   },
-  // ],
+  updateLikeStatus: [
+    {
+      likeStatus: LikeStatus.Like,
+    },
+    {
+      likeStatus: LikeStatus.Dislike,
+    },
+    {
+      likeStatus: LikeStatus.None,
+    },
+  ],
 };
 
 export async function createComment(

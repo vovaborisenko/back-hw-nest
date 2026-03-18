@@ -6,7 +6,7 @@ import {
   createComments,
 } from '../utils/comment/comment.util';
 import { createUserAndLogin, userDto } from '../utils/user/user.util';
-// import { LikeStatus } from '../../../src/likes/types/like';
+import { LikeStatus } from '../../src/modules/bloggers-platform/likes/enums/like-status';
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { App } from 'supertest/types';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -113,13 +113,13 @@ describe('CommentsController (e2e)', () => {
     });
   });
 
-  describe.skip(`PUT ${FULL_PATH.COMMENTS}/:id/like-status`, () => {
+  describe(`PUT ${FULL_PATH.COMMENTS}/:id/like-status`, () => {
     it('should return 404 when no comment', async () => {
       const { token } = await createUserAndLogin(app);
       await request(app)
         .put(`${FULL_PATH.COMMENTS}/${validMongoId}/like-status`)
         .set('Authorization', `Bearer ${token}`)
-        // .send(commentDto.updateLikeStatus[0])
+        .send(commentDto.updateLikeStatus[0])
         .expect(HttpStatus.NOT_FOUND);
     });
 
@@ -129,7 +129,7 @@ describe('CommentsController (e2e)', () => {
       await request(app)
         .put(`${FULL_PATH.COMMENTS}/${comment.id}/like-status`)
         .set('Authorization', `Bearer ${token}`)
-        // .send(commentDto.updateLikeStatus[0])
+        .send(commentDto.updateLikeStatus[0])
         .expect(HttpStatus.NO_CONTENT);
 
       const response = await request(app)
@@ -142,14 +142,14 @@ describe('CommentsController (e2e)', () => {
         likesInfo: {
           ...comment.likesInfo,
           likesCount: comment.likesInfo.likesCount + 1,
-          // myStatus: LikeStatus.Like,
+          myStatus: LikeStatus.Like,
         },
       });
 
       await request(app)
         .put(`${FULL_PATH.COMMENTS}/${comment.id}/like-status`)
         .set('Authorization', `Bearer ${token}`)
-        // .send(commentDto.updateLikeStatus[1])
+        .send(commentDto.updateLikeStatus[1])
         .expect(HttpStatus.NO_CONTENT);
 
       const responseAfterDislike = await request(app)
@@ -162,7 +162,7 @@ describe('CommentsController (e2e)', () => {
         likesInfo: {
           ...comment.likesInfo,
           dislikesCount: comment.likesInfo.dislikesCount + 1,
-          // myStatus: LikeStatus.Dislike,
+          myStatus: LikeStatus.Dislike,
         },
       });
     });
@@ -175,7 +175,7 @@ describe('CommentsController (e2e)', () => {
         await request(app)
           .put(`${FULL_PATH.COMMENTS}/${comments[i].id}/like-status`)
           .set('Authorization', `Bearer ${token}`)
-          // .send(commentDto.updateLikeStatus[0])
+          .send(commentDto.updateLikeStatus[0])
           .expect(HttpStatus.NO_CONTENT);
 
         const response = await request(app)
@@ -186,7 +186,7 @@ describe('CommentsController (e2e)', () => {
         expect(response.body.likesInfo).toEqual({
           ...comments[i].likesInfo,
           likesCount: 1,
-          // myStatus: LikeStatus.Like,
+          myStatus: LikeStatus.Like,
         });
 
         const responseUnauth = await request(app)
@@ -196,7 +196,7 @@ describe('CommentsController (e2e)', () => {
         expect(responseUnauth.body.likesInfo).toEqual({
           ...comments[i].likesInfo,
           likesCount: 1,
-          // myStatus: LikeStatus.None,
+          myStatus: LikeStatus.None,
         });
       }
       // set dislikes
@@ -204,7 +204,7 @@ describe('CommentsController (e2e)', () => {
         await request(app)
           .put(`${FULL_PATH.COMMENTS}/${comments[i].id}/like-status`)
           .set('Authorization', `Bearer ${token}`)
-          // .send(commentDto.updateLikeStatus[1])
+          .send(commentDto.updateLikeStatus[1])
           .expect(HttpStatus.NO_CONTENT);
 
         const response = await request(app)
@@ -215,7 +215,7 @@ describe('CommentsController (e2e)', () => {
         expect(response.body.likesInfo).toEqual({
           ...comments[i].likesInfo,
           dislikesCount: 1,
-          // myStatus: LikeStatus.Dislike,
+          myStatus: LikeStatus.Dislike,
         });
 
         const responseUnauth = await request(app)
@@ -225,7 +225,7 @@ describe('CommentsController (e2e)', () => {
         expect(responseUnauth.body.likesInfo).toEqual({
           ...comments[i].likesInfo,
           dislikesCount: 1,
-          // myStatus: LikeStatus.None,
+          myStatus: LikeStatus.None,
         });
       }
       // set none
@@ -233,7 +233,7 @@ describe('CommentsController (e2e)', () => {
         await request(app)
           .put(`${FULL_PATH.COMMENTS}/${comments[i].id}/like-status`)
           .set('Authorization', `Bearer ${token}`)
-          // .send(commentDto.updateLikeStatus[2])
+          .send(commentDto.updateLikeStatus[2])
           .expect(HttpStatus.NO_CONTENT);
 
         const response = await request(app)
@@ -243,7 +243,7 @@ describe('CommentsController (e2e)', () => {
 
         expect(response.body.likesInfo).toEqual({
           ...comments[i].likesInfo,
-          // myStatus: LikeStatus.None,
+          myStatus: LikeStatus.None,
         });
 
         const responseUnauth = await request(app)
@@ -252,7 +252,7 @@ describe('CommentsController (e2e)', () => {
 
         expect(responseUnauth.body.likesInfo).toEqual({
           ...comments[i].likesInfo,
-          // myStatus: LikeStatus.None,
+          myStatus: LikeStatus.None,
         });
       }
     });

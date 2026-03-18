@@ -30,8 +30,12 @@ import { GetCommentByIdQuery } from '../../comments/application/queries/get-comm
 import { CommentViewDto } from '../../comments/api/view-dto/comment.view-dto';
 import { GetCommentsQueryParamsInputDto } from '../../comments/api/input-dto/get-comments.query-params.input-dto';
 import { GetCommentsQuery } from '../../comments/application/queries/get-comments.query';
+import { LikeInputDto } from '../../likes/api/input-dto/like.input-dto';
+import { JwtOptionalAuthGuard } from '../../../user-accounts/guards/bearer/jwt-optional-auth.guard';
+import { ExtractUserIfExistsFromRequestDecorator } from '../../../user-accounts/guards/decorators/param/extract-user-if-exists-from-request.decorator';
+import { SetPostLikeCommand } from '../application/usecases/set-post-like.usecase';
 
-const { PREFIX, SINGLE, COMMENTS } = PATH.POSTS;
+const { PREFIX, SINGLE, COMMENTS, LIKE_STATUS } = PATH.POSTS;
 
 @Controller(PREFIX)
 export class PostsController {
@@ -50,9 +54,13 @@ export class PostsController {
     return this.postsQueryRepository.getAll(query);
   }
 
+  @UseGuards(JwtOptionalAuthGuard)
   @Get(SINGLE)
-  getById(@Param(PARAM.ID) id: string): Promise<PostViewDto> {
-    return this.postsQueryRepository.getByIdOrNotFoundFail(id);
+  getById(
+    @Param(PARAM.ID) id: string,
+    @ExtractUserIfExistsFromRequestDecorator() user: UserContextDto | null,
+  ): Promise<PostViewDto> {
+    return this.postsQueryRepository.getByIdOrNotFoundFail(id, user?.id);
   }
 
   @UseGuards(BasicAuthGuard)
@@ -80,9 +88,11 @@ export class PostsController {
     await this.postService.deletePost(id);
   }
 
+  @UseGuards(JwtOptionalAuthGuard)
   @Get(COMMENTS)
   async getPostComments(
     @Param(PARAM.ID) postId: string,
+    @ExtractUserIfExistsFromRequestDecorator() user: UserContextDto | null,
     @Query()
     query: GetCommentsQueryParamsInputDto,
   ): Promise<BasePaginatedViewDto<CommentViewDto[]>> {
@@ -105,5 +115,22 @@ export class PostsController {
     );
 
     return this.queryBus.execute(new GetCommentByIdQuery(commentId));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Put(LIKE_STATUS)
+  async updateLikeStatus(
+    @ExtractUserFromRequestDecorator() user: UserContextDto,
+    @Param(PARAM.ID) postId: string,
+    @Body() dto: LikeInputDto,
+  ): Promise<void> {
+    await this.commandBus.execute(
+      new SetPostLikeCommand({
+        status: dto.likeStatus,
+        author: user.id,
+        parent: postId,
+      }),
+    );
   }
 }

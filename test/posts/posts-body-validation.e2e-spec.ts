@@ -120,14 +120,14 @@ describe('Posts API body validation', () => {
     );
   });
 
-  describe.skip(`PUT ${FULL_PATH.POSTS}/:id/like-status`, () => {
+  describe(`PUT ${FULL_PATH.POSTS}/:id/like-status`, () => {
     it.each`
       field           | value        | message
-      ${'likeStatus'} | ${null}      | ${'likeStatus must be a string'}
-      ${'likeStatus'} | ${5}         | ${'likeStatus must be a string'}
-      ${'likeStatus'} | ${''}        | ${'Should be on of None, Like, Dislike'}
-      ${'likeStatus'} | ${'    '}    | ${'Should be on of None, Like, Dislike'}
-      ${'likeStatus'} | ${'unknown'} | ${'Should be on of None, Like, Dislike'}
+      ${'likeStatus'} | ${null}      | ${'likeStatus must be one of the following values: None, Like, Dislike'}
+      ${'likeStatus'} | ${5}         | ${'likeStatus must be one of the following values: None, Like, Dislike'}
+      ${'likeStatus'} | ${''}        | ${'likeStatus must be one of the following values: None, Like, Dislike'}
+      ${'likeStatus'} | ${'    '}    | ${'likeStatus must be one of the following values: None, Like, Dislike'}
+      ${'likeStatus'} | ${'unknown'} | ${'likeStatus must be one of the following values: None, Like, Dislike'}
     `(
       'should throw 400: field = $field, value = $value, message = $message',
       async ({ field, value, message }) => {
