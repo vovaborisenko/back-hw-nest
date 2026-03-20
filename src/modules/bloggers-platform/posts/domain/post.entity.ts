@@ -1,11 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import {
-  Document,
-  HydratedDocument,
-  Model,
-  type PopulatedDoc,
-  Types,
-} from 'mongoose';
+import { HydratedDocument, Model, Types } from 'mongoose';
 import { CreatePostDomainDto } from './dto/create-post.domain.dto';
 import { UpdatePostDto } from '../dto/update-post.dto';
 import { Blog } from '../../blogs/domain/blog.entity';
@@ -22,7 +16,7 @@ export class Post {
   content: string;
 
   @Prop({ type: Types.ObjectId, ref: Blog.name, required: true })
-  blog: PopulatedDoc<Blog & Document>;
+  blog: Types.ObjectId;
 
   createdAt: Date;
 

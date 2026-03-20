@@ -23,9 +23,7 @@ function errorFormatter(
 
       for (const key of constrainKeys) {
         errorsForResponse.push({
-          message: error.constraints[key]
-            ? `${error.constraints[key]}; Received value: ${error?.value}`
-            : '',
+          message: error.constraints[key] ?? '',
           field: error.property,
         });
       }

@@ -36,7 +36,7 @@ describe('BlogsController (e2e)', () => {
       .expect(HttpStatus.NO_CONTENT);
   });
 
-  it.skip.each`
+  it.each`
     path                             | method
     ${FULL_PATH.BLOGS}               | ${'post'}
     ${FULL_PATH.BLOGS + '/12'}       | ${'put'}

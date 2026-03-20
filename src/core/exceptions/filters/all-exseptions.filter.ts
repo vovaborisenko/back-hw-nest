@@ -4,9 +4,8 @@ import {
   ExceptionFilter,
   HttpStatus,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import type { ErrorResponseBody } from './error-response-body';
-// import { DomainExceptionCode } from '../domain-exception-code';
 
 //Все ошибки
 @Catch()
@@ -14,39 +13,22 @@ export class AllHttpExceptionsFilter implements ExceptionFilter {
   catch(exception: Error, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
-    const request = ctx.getRequest<Request>();
-    const message = exception.message || 'Unknown exception occurred.';
     const status = HttpStatus.INTERNAL_SERVER_ERROR;
-    const responseBody = this.buildResponseBody(request.url, message);
+    const responseBody = this.buildResponseBody(exception);
 
     response.status(status).json(responseBody);
   }
 
-  private buildResponseBody(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    requestUrl: string,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    message: string,
-  ): ErrorResponseBody {
+  private buildResponseBody(exception: Error): ErrorResponseBody {
     //TODO: Replace with getter from configService. will be in the following lessons
     const isProduction = process.env.NODE_ENV === 'production';
 
-    if (isProduction) {
-      return {
-        // timestamp: new Date().toISOString(),
-        // path: null,
-        // message: 'Some error occurred',
-        errorsMessages: [],
-        // code: DomainExceptionCode.InternalServerError,
-      };
+    if (!isProduction) {
+      console.error(exception);
     }
 
     return {
-      // timestamp: new Date().toISOString(),
-      // path: requestUrl,
-      // message,
-      errorsMessages: [],
-      // code: DomainExceptionCode.InternalServerError,
+      errorsMessages: [{ field: 'exception', message: exception.message }],
     };
   }
 }

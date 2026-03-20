@@ -53,10 +53,8 @@ describe('Auth Controller (e2e)', () => {
     it('should return 200, refreshToken and accessToken when credentials is right', async () => {
       const { user, token, refreshToken } = await createUserAndLogin(app);
 
-      // @ts-ignore
       expect(new JwtService().decode(token)?.id).toBe(user.id);
-      // @ts-ignore
-      // expect(JwtService.decode(refreshToken)?.userId).toBe(user.id);
+      expect(new JwtService().decode(refreshToken)?.id).toBe(user.id);
     });
   });
 
@@ -164,12 +162,10 @@ describe('Auth Controller (e2e)', () => {
 
       expect(response.body.accessToken).not.toBe(token);
       expect(cookies.refreshToken).not.toBe(refreshToken);
-      // @ts-ignore
-      expect(JwtService.decode(response.body.accessToken)?.userId).toBe(
+      expect(new JwtService().decode(response.body.accessToken)?.id).toBe(
         user.id,
       );
-      // @ts-ignore
-      expect(JwtService.decode(cookies.refreshToken)?.userId).toBe(user.id);
+      expect(new JwtService().decode(cookies.refreshToken)?.id).toBe(user.id);
     });
 
     it('should return 401 on second request with the same token', async () => {
