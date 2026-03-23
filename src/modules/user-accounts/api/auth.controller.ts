@@ -24,6 +24,7 @@ import { CreateUserInputDto } from './input-dto/users.input-dto';
 import { RegistrationConfirmationInputDto } from './input-dto/registration-confirmation.input-dto';
 import { RegistrationEmailResendingInputDto } from './input-dto/registration-email-resending.input-dto';
 import { PasswordUpdateInputDto } from './input-dto/password-update.input-dto';
+import { ThrottlerGuard } from '@nestjs/throttler';
 
 const { PREFIX, ...URL } = PATH.AUTH;
 
@@ -36,6 +37,7 @@ export class AuthController {
   ) {}
 
   @UseGuards(LocalAuthGuard)
+  @UseGuards(ThrottlerGuard)
   @HttpCode(HttpStatus.OK)
   @Post(URL.LOGIN)
   async login(
@@ -52,24 +54,28 @@ export class AuthController {
     return { accessToken };
   }
 
+  @UseGuards(ThrottlerGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Post(URL.NEW_PASSWORD)
   async updatePassword(@Body() body: PasswordUpdateInputDto) {
     await this.passwordService.changePasswordByRecoveryCode(body);
   }
 
+  @UseGuards(ThrottlerGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Post(URL.PASSWORD_RECOVERY)
   async passwordRecovery(@Body() body: PasswordRecoveryInputDto) {
     await this.passwordService.sendRecoveryCode(body);
   }
 
+  @UseGuards(ThrottlerGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Post(URL.REGISTRATION)
   async registration(@Body() body: CreateUserInputDto) {
     await this.authService.registration(body);
   }
 
+  @UseGuards(ThrottlerGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Post(URL.REG_CONFIRMATION)
   async registrationConfirmation(
@@ -78,6 +84,7 @@ export class AuthController {
     await this.authService.confirmCode(body);
   }
 
+  @UseGuards(ThrottlerGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Post(URL.REG_EMAIL_RESENDING)
   async registrationEmailResending(
