@@ -25,12 +25,18 @@ import { RegistrationConfirmationInputDto } from './input-dto/registration-confi
 import { RegistrationEmailResendingInputDto } from './input-dto/registration-email-resending.input-dto';
 import { PasswordUpdateInputDto } from './input-dto/password-update.input-dto';
 import { ThrottlerGuard } from '@nestjs/throttler';
+import { IpAddress } from '../guards/decorators/param/ip-address';
+import { UserAgent } from '../guards/decorators/param/user-agent';
+import type { Agent } from 'useragent';
+import { CommandBus } from '@nestjs/cqrs';
+import { CreateSecurityDeviceCommand } from '../security-devices/application/usecases/create-security-devices.usecase';
 
 const { PREFIX, ...URL } = PATH.AUTH;
 
 @Controller(PREFIX)
 export class AuthController {
   constructor(
+    private readonly commandBus: CommandBus,
     private readonly authService: AuthService,
     private readonly passwordService: PasswordService,
     private readonly usersQueryRepository: UsersQueryRepository,
@@ -41,10 +47,15 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post(URL.LOGIN)
   async login(
+    @IpAddress() ip: string | null,
+    @UserAgent() userAgent: Agent,
     @ExtractUserFromRequestDecorator() user: UserContextDto,
     @Res({ passthrough: true }) res: Response,
   ): Promise<LoginViewDto> {
     const { accessToken, refreshToken } = await this.authService.login(user.id);
+    await this.commandBus.execute(
+      new CreateSecurityDeviceCommand({ ip, userAgent, refreshToken }),
+    );
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,

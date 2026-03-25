@@ -19,7 +19,7 @@ export class AuthService {
     private readonly usersRepository: UsersRepository,
     @Inject(INJECT_TOKEN.ACCESS)
     private readonly accessTokenContext: JwtService,
-    @Inject(INJECT_TOKEN.ACCESS)
+    @Inject(INJECT_TOKEN.REFRESH)
     private readonly refreshTokenContext: JwtService,
     private readonly bcryptService: BcryptService,
     private readonly emailService: EmailService,
@@ -31,6 +31,7 @@ export class AuthService {
     const accessToken = await this.accessTokenContext.signAsync({ id: userId });
     const refreshToken = await this.refreshTokenContext.signAsync({
       id: userId,
+      deviceId: crypto.randomUUID(),
     });
 
     return { accessToken, refreshToken };

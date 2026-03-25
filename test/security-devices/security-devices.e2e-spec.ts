@@ -55,8 +55,7 @@ describe('Security Devices API', () => {
         .expect(HttpStatus.OK);
 
       expect(response.body.length).toBe(1);
-      // @ts-ignore
-      expect(jws.decode(refreshToken)?.deviceId).toBe(
+      expect(new JwtService().decode(refreshToken)?.deviceId).toBe(
         response.body[0].deviceId,
       );
     });
@@ -159,10 +158,12 @@ describe('Security Devices API', () => {
         app,
         userDto.create[1],
       );
-      // @ts-ignore
-      const user1DeviceId1 = jws.decode(user1Tokens.refreshToken)?.deviceId;
-      // @ts-ignore
-      const user2DeviceId1 = jws.decode(user2Tokens.refreshToken)?.deviceId;
+      const user1DeviceId1 = new JwtService().decode(
+        user1Tokens.refreshToken,
+      )?.deviceId;
+      const user2DeviceId1 = new JwtService().decode(
+        user2Tokens.refreshToken,
+      )?.deviceId;
 
       await request(app)
         .delete(`${FULL_PATH.DEVICES}/${user2DeviceId1}`)

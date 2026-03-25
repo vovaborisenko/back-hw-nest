@@ -12,21 +12,34 @@ import { AuthService } from './application/auth.service';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { LocalStrategy } from './guards/local/local.strategy';
 import { JwtStrategy } from './guards/bearer/jwt.strategy';
+import { JwtRefreshStrategy } from './guards/bearer/jwt-refresh.strategy';
 import { PasswordService } from './application/password.service';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { INJECT_TOKEN } from './constants/inject-token';
+import { securityDevicesHandlers } from './security-devices/application';
+import { SecurityDevicesController } from './security-devices/api/security-devices.controller';
+import { SecurityDevicesRepository } from './security-devices/repositories/security-devices.repository';
+import { SecurityDevicesQueryRepository } from './security-devices/repositories/security-devices.query-repository';
+import {
+  SecurityDevice,
+  SecurityDeviceSchema,
+} from './security-devices/domain/security-device.entity';
 
 @Module({
   imports: [
     JwtModule,
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    MongooseModule.forFeature([
+      { name: User.name, schema: UserSchema },
+      { name: SecurityDevice.name, schema: SecurityDeviceSchema },
+    ]),
     NotificationsModule,
   ],
-  controllers: [UsersController, AuthController],
+  controllers: [UsersController, AuthController, SecurityDevicesController],
   providers: [
     AuthService,
     BasicStrategy,
     JwtStrategy,
+    JwtRefreshStrategy,
     LocalStrategy,
     UsersService,
     UsersRepository,
@@ -55,6 +68,9 @@ import { INJECT_TOKEN } from './constants/inject-token';
         });
       },
     },
+    SecurityDevicesRepository,
+    SecurityDevicesQueryRepository,
+    ...securityDevicesHandlers,
   ],
 })
 export class UserAccountsModule {}

@@ -14,9 +14,12 @@ export class SecurityDevicesQueryRepository {
     private readonly SecurityDeviceModel: SecurityDeviceModelType,
   ) {}
 
-  async findActiveByUserId(userId: string): Promise<SecurityDeviceViewDto[]> {
+  async findActiveByUserId(
+    userId: string | Types.ObjectId,
+  ): Promise<SecurityDeviceViewDto[]> {
     const items = await this.SecurityDeviceModel.find({
       userId: new Types.ObjectId(userId),
+      deletedAt: null,
       expiredAt: { $gte: new Date() },
     }).lean();
 

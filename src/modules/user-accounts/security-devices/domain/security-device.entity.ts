@@ -16,8 +16,8 @@ export class SecurityDevice {
   @Prop({ type: Date, default: Date.now })
   expiredAt: Date;
 
-  @Prop({ type: String, required: true })
-  ip: string;
+  @Prop({ type: String, required: true, nullable: true })
+  ip: string | null;
 
   @Prop({ type: Date, required: true })
   issuedAt: Date;
@@ -32,6 +32,13 @@ export class SecurityDevice {
 
   static createInstance(dto: CreateSecurityDeviceDomainDto) {
     const device = new this();
+
+    device.userId = new Types.ObjectId(dto.userId);
+    device.deviceId = dto.deviceId;
+    device.deviceName = dto.deviceName;
+    device.expiredAt = parseJwtTime(dto.exp);
+    device.ip = dto.ip;
+    device.issuedAt = parseJwtTime(dto.iat);
 
     return device as SecurityDeviceDocument;
   }
@@ -57,4 +64,4 @@ SecurityDeviceSchema.loadClass(SecurityDevice);
 
 export type SecurityDeviceDocument = HydratedDocument<SecurityDevice>;
 export type SecurityDeviceModelType = Model<SecurityDeviceDocument> &
-  typeof User;
+  typeof SecurityDevice;
