@@ -122,7 +122,7 @@ describe('Auth Controller (e2e)', () => {
     });
   });
 
-  describe.skip(`POST ${FULL_PATH.REFRESH_TOKEN}`, () => {
+  describe(`POST ${FULL_PATH.REFRESH_TOKEN}`, () => {
     it('should return 401 if refreshToken is not exist', async () => {
       await request(app)
         .post(FULL_PATH.REFRESH_TOKEN)
@@ -172,7 +172,7 @@ describe('Auth Controller (e2e)', () => {
     });
   });
 
-  describe.skip(`POST ${FULL_PATH.LOGOUT}`, () => {
+  describe(`POST ${FULL_PATH.LOGOUT}`, () => {
     it('should return 401 if refreshToken is not exist', async () => {
       await request(app).post(FULL_PATH.LOGOUT).expect(HttpStatus.UNAUTHORIZED);
     });

@@ -13,7 +13,9 @@ import { GetSecurityDevicesQuery } from '../application/queries/get-security-dev
 import { SecurityDeviceViewDto } from './view-dto/security-device.view-dto';
 import { JwtRefreshAuthGuard } from '../../guards/bearer/jwt-refresh-auth.guard';
 import { ExtractUserFromRequestDecorator } from '../../guards/decorators/param/extract-user-from-request.decorator';
-import { UserContextDto } from '../../guards/dto/user-context.dto';
+import { RefreshTokenDto } from '../../guards/dto/user-context.dto';
+import { DeleteSecurityDeviceCommand } from '../application/usecases/delete-security-device.usecase';
+import { DeleteSecurityDevicesCommand } from '../application/usecases/delete-security-devices.usecase';
 
 const { PREFIX, SINGLE } = PATH.DEVICES;
 
@@ -27,18 +29,30 @@ export class SecurityDevicesController {
 
   @Get()
   getAllDevices(
-    @ExtractUserFromRequestDecorator() user: UserContextDto,
+    @ExtractUserFromRequestDecorator() dto: RefreshTokenDto,
   ): Promise<SecurityDeviceViewDto[]> {
-    return this.queryBus.execute(new GetSecurityDevicesQuery(user.id));
+    return this.queryBus.execute(new GetSecurityDevicesQuery(dto.id));
   }
 
   @Delete()
   @HttpCode(HttpStatus.NO_CONTENT)
-  deleteDevices() {}
+  async deleteDevices(@ExtractUserFromRequestDecorator() dto: RefreshTokenDto) {
+    await this.commandBus.execute(
+      new DeleteSecurityDevicesCommand({
+        userId: dto.id,
+        deviceId: dto.deviceId,
+      }),
+    );
+  }
 
   @Delete(SINGLE)
   @HttpCode(HttpStatus.NO_CONTENT)
-  deleteDevice(@Param(PARAM.ID) deviceId: string) {
-    console.log(deviceId);
+  async deleteDevice(
+    @ExtractUserFromRequestDecorator() dto: RefreshTokenDto,
+    @Param(PARAM.ID) deviceId: string,
+  ) {
+    await this.commandBus.execute(
+      new DeleteSecurityDeviceCommand({ userId: dto.id, deviceId }),
+    );
   }
 }

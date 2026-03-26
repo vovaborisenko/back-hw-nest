@@ -51,6 +51,7 @@ export class SecurityDevicesRepository {
     const { userId, ...rest } = device;
 
     const filter: QueryFilter<SecurityDeviceDocument> = rest;
+    filter.deletedAt = null;
 
     if (userId !== undefined) {
       filter.userId = new Types.ObjectId(userId);
