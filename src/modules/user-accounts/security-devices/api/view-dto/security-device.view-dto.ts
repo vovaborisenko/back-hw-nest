@@ -9,7 +9,7 @@ export class SecurityDeviceViewDto {
   static mapToView(device: SecurityDeviceDocument): SecurityDeviceViewDto {
     const dto = new SecurityDeviceViewDto();
 
-    dto.ip = device.ip;
+    dto.ip = device.ip || '';
     dto.deviceId = device.deviceId;
     dto.lastActiveDate = device.issuedAt.toISOString();
     dto.title = device.deviceName;
