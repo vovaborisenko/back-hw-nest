@@ -5,9 +5,11 @@ import { Request } from 'express';
 import { RefreshTokenDto } from '../dto/user-context.dto';
 import { SecurityDevicesRepository } from '../../security-devices/repositories/security-devices.repository';
 import { parseJwtTime } from '../../../../core/utils/parse-jwt-time';
+import { UserAccountsConfig } from '../../config/user-accounts.config';
 
-function extractJwt(req: Request) {
-  return req.cookies.refreshToken;
+function extractJwt(req: Request): string | null {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  return req.cookies.refreshToken || null;
 }
 
 @Injectable()
@@ -17,11 +19,12 @@ export class JwtRefreshStrategy extends PassportStrategy(
 ) {
   constructor(
     private readonly securityDevicesRepository: SecurityDevicesRepository,
+    userAccountsConfig: UserAccountsConfig,
   ) {
     super({
       jwtFromRequest: extractJwt,
       ignoreExpiration: false,
-      secretOrKey: 'some-refresh-secret',
+      secretOrKey: userAccountsConfig.refreshTokenSecret,
     });
   }
 

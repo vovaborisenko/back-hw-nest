@@ -24,6 +24,7 @@ import {
   SecurityDevice,
   SecurityDeviceSchema,
 } from './security-devices/domain/security-device.entity';
+import { UserAccountsConfig } from './config/user-accounts.config';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import {
   ],
   controllers: [UsersController, AuthController, SecurityDevicesController],
   providers: [
+    UserAccountsConfig,
     AuthService,
     BasicStrategy,
     JwtStrategy,
@@ -48,22 +50,28 @@ import {
     PasswordService,
     {
       provide: INJECT_TOKEN.ACCESS,
-      useFactory(): JwtService {
+      inject: [UserAccountsConfig],
+      useFactory(config: UserAccountsConfig): JwtService {
         return new JwtService({
-          secret: 'some-secret', // process.env.AC_SECRET,
+          secret: config.accessTokenSecret,
           signOptions: {
-            expiresIn: '1h', // process.env.AC_TIME,
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
+            expiresIn: config.accessTokenExpireIn,
           },
         });
       },
     },
     {
       provide: INJECT_TOKEN.REFRESH,
-      useFactory(): JwtService {
+      inject: [UserAccountsConfig],
+      useFactory(config: UserAccountsConfig): JwtService {
         return new JwtService({
-          secret: 'some-refresh-secret',
+          secret: config.refreshTokenSecret,
           signOptions: {
-            expiresIn: '1d',
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
+            expiresIn: config.refreshTokenExpireIn,
           },
         });
       },
