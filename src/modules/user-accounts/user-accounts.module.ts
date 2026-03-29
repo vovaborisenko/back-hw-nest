@@ -12,21 +12,36 @@ import { AuthService } from './application/auth.service';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { LocalStrategy } from './guards/local/local.strategy';
 import { JwtStrategy } from './guards/bearer/jwt.strategy';
+import { JwtRefreshStrategy } from './guards/bearer/jwt-refresh.strategy';
 import { PasswordService } from './application/password.service';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { INJECT_TOKEN } from './constants/inject-token';
+import { securityDevicesHandlers } from './security-devices/application';
+import { SecurityDevicesController } from './security-devices/api/security-devices.controller';
+import { SecurityDevicesRepository } from './security-devices/repositories/security-devices.repository';
+import { SecurityDevicesQueryRepository } from './security-devices/repositories/security-devices.query-repository';
+import {
+  SecurityDevice,
+  SecurityDeviceSchema,
+} from './security-devices/domain/security-device.entity';
+import { UserAccountsConfig } from './config/user-accounts.config';
 
 @Module({
   imports: [
     JwtModule,
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    MongooseModule.forFeature([
+      { name: User.name, schema: UserSchema },
+      { name: SecurityDevice.name, schema: SecurityDeviceSchema },
+    ]),
     NotificationsModule,
   ],
-  controllers: [UsersController, AuthController],
+  controllers: [UsersController, AuthController, SecurityDevicesController],
   providers: [
+    UserAccountsConfig,
     AuthService,
     BasicStrategy,
     JwtStrategy,
+    JwtRefreshStrategy,
     LocalStrategy,
     UsersService,
     UsersRepository,
@@ -35,26 +50,35 @@ import { INJECT_TOKEN } from './constants/inject-token';
     PasswordService,
     {
       provide: INJECT_TOKEN.ACCESS,
-      useFactory(): JwtService {
+      inject: [UserAccountsConfig],
+      useFactory(config: UserAccountsConfig): JwtService {
         return new JwtService({
-          secret: 'some-secret', // process.env.AC_SECRET,
+          secret: config.accessTokenSecret,
           signOptions: {
-            expiresIn: '1h', // process.env.AC_TIME,
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
+            expiresIn: config.accessTokenExpireIn,
           },
         });
       },
     },
     {
       provide: INJECT_TOKEN.REFRESH,
-      useFactory(): JwtService {
+      inject: [UserAccountsConfig],
+      useFactory(config: UserAccountsConfig): JwtService {
         return new JwtService({
-          secret: 'some-refresh-secret',
+          secret: config.refreshTokenSecret,
           signOptions: {
-            expiresIn: '1d',
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
+            expiresIn: config.refreshTokenExpireIn,
           },
         });
       },
     },
+    SecurityDevicesRepository,
+    SecurityDevicesQueryRepository,
+    ...securityDevicesHandlers,
   ],
 })
 export class UserAccountsModule {}

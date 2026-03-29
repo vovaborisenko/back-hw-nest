@@ -1,12 +1,18 @@
 import { PassportStrategy } from '@nestjs/passport';
 import { BasicStrategy as Strategy } from 'passport-http';
 import { Injectable } from '@nestjs/common';
+import { UserAccountsConfig } from '../../config/user-accounts.config';
 
 @Injectable()
 export class BasicStrategy extends PassportStrategy(Strategy) {
-  validate(username: string, password: string): boolean {
-    const { ADMIN_USERNAME, ADMIN_PASSWORD } = process.env;
+  constructor(private readonly userAccountsConfig: UserAccountsConfig) {
+    super();
+  }
 
-    return username === ADMIN_USERNAME && password === ADMIN_PASSWORD;
+  validate(username: string, password: string): boolean {
+    return (
+      username === this.userAccountsConfig.adminName &&
+      password === this.userAccountsConfig.adminPassword
+    );
   }
 }

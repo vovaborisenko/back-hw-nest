@@ -11,6 +11,7 @@ import { DomainException } from '../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-code';
 import { RegistrationEmailResendingDto } from '../dto/registration-email-resending.dto';
 import { INJECT_TOKEN } from '../constants/inject-token';
+import { CreateRefreshTokenDto } from '../dto/create-refresh-token.dto';
 
 @Injectable()
 export class AuthService {
@@ -19,19 +20,22 @@ export class AuthService {
     private readonly usersRepository: UsersRepository,
     @Inject(INJECT_TOKEN.ACCESS)
     private readonly accessTokenContext: JwtService,
-    @Inject(INJECT_TOKEN.ACCESS)
+    @Inject(INJECT_TOKEN.REFRESH)
     private readonly refreshTokenContext: JwtService,
     private readonly bcryptService: BcryptService,
     private readonly emailService: EmailService,
   ) {}
 
-  async login(
+  async generateTokens(
     userId: string,
+    deviceId: string = crypto.randomUUID(),
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const accessToken = await this.accessTokenContext.signAsync({ id: userId });
-    const refreshToken = await this.refreshTokenContext.signAsync({
-      id: userId,
-    });
+    const refreshToken =
+      await this.refreshTokenContext.signAsync<CreateRefreshTokenDto>({
+        id: userId,
+        deviceId,
+      });
 
     return { accessToken, refreshToken };
   }

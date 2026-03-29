@@ -6,37 +6,25 @@ import { extractCookies } from '../utils/cookies/cookies';
 import { wait } from '../utils/core/wait';
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { App } from 'supertest/types';
-import { Test, TestingModule } from '@nestjs/testing';
-import { AppModule } from '../../src/app.module';
-import { appSetup } from '../../src/setup/app.setup';
+import { initTestApp } from '../utils/core/init-test-app';
+import { deleteAllData } from '../utils/core/delete-all-data';
 import { FULL_PATH } from '../../src/core/constants/paths';
 
 describe('Auth Controller (e2e)', () => {
   let nestApp: INestApplication<App>;
   let app: App;
 
-  beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    nestApp = moduleFixture.createNestApplication<INestApplication<App>>();
-
-    appSetup(nestApp);
-
-    await nestApp.init();
-
-    app = nestApp.getHttpServer();
-  });
-
-  afterAll(async () => {
-    await nestApp!.close();
-  });
-
   beforeEach(async () => {
-    await request(app)
-      .delete(FULL_PATH.TESTING_ALL)
-      .expect(HttpStatus.NO_CONTENT);
+    const result = await initTestApp();
+
+    nestApp = result.nestApp;
+    app = result.httpServer;
+
+    await deleteAllData(app);
+  });
+
+  afterEach(async () => {
+    await nestApp!.close();
   });
 
   describe(`POST ${FULL_PATH.LOGIN}`, () => {
@@ -134,7 +122,7 @@ describe('Auth Controller (e2e)', () => {
     });
   });
 
-  describe.skip(`POST ${FULL_PATH.REFRESH_TOKEN}`, () => {
+  describe(`POST ${FULL_PATH.REFRESH_TOKEN}`, () => {
     it('should return 401 if refreshToken is not exist', async () => {
       await request(app)
         .post(FULL_PATH.REFRESH_TOKEN)
@@ -184,7 +172,7 @@ describe('Auth Controller (e2e)', () => {
     });
   });
 
-  describe.skip(`POST ${FULL_PATH.LOGOUT}`, () => {
+  describe(`POST ${FULL_PATH.LOGOUT}`, () => {
     it('should return 401 if refreshToken is not exist', async () => {
       await request(app).post(FULL_PATH.LOGOUT).expect(HttpStatus.UNAUTHORIZED);
     });
@@ -237,20 +225,20 @@ describe('Auth Controller (e2e)', () => {
     });
   });
 
-  describe.skip(`Too many attempts`, () => {
+  describe(`Too many attempts`, () => {
     const period = Number(process.env.RATE_LIMIT_PERIOD) || 1e3;
 
     it.each`
-      path                             | maxAttempts
-      ${FULL_PATH.LOGIN}               | ${5}
-      ${FULL_PATH.NEW_PASSWORD}        | ${5}
-      ${FULL_PATH.PASSWORD_RECOVERY}   | ${5}
-      ${FULL_PATH.REG_CONFIRMATION}    | ${5}
-      ${FULL_PATH.REG_EMAIL_RESENDING} | ${5}
-      ${FULL_PATH.REGISTRATION}        | ${5}
+      path                             | maxAttempts | expectedCode
+      ${FULL_PATH.LOGIN}               | ${5}        | ${HttpStatus.UNAUTHORIZED}
+      ${FULL_PATH.NEW_PASSWORD}        | ${5}        | ${HttpStatus.BAD_REQUEST}
+      ${FULL_PATH.PASSWORD_RECOVERY}   | ${5}        | ${HttpStatus.BAD_REQUEST}
+      ${FULL_PATH.REG_CONFIRMATION}    | ${5}        | ${HttpStatus.BAD_REQUEST}
+      ${FULL_PATH.REG_EMAIL_RESENDING} | ${5}        | ${HttpStatus.BAD_REQUEST}
+      ${FULL_PATH.REGISTRATION}        | ${5}        | ${HttpStatus.BAD_REQUEST}
     `(
       `should return 429 POST $path more than $maxAttempts attempts`,
-      async ({ path, maxAttempts }) => {
+      async ({ path, maxAttempts, expectedCode }) => {
         await runTest();
 
         // after 10sec has more attempts
@@ -263,9 +251,7 @@ describe('Auth Controller (e2e)', () => {
               .post(path)
               .send()
               .expect(
-                i > maxAttempts
-                  ? HttpStatus.TOO_MANY_REQUESTS
-                  : HttpStatus.BAD_REQUEST,
+                i > maxAttempts ? HttpStatus.TOO_MANY_REQUESTS : expectedCode,
               );
           }
         }

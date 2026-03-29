@@ -3,27 +3,21 @@ import { validAuth } from '../constants/common';
 import { blogDto, createBlog } from '../utils/blog/blog.util';
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { App } from 'supertest/types';
-import { Test, TestingModule } from '@nestjs/testing';
-import { AppModule } from '../../src/app.module';
-import { appSetup } from '../../src/setup/app.setup';
+import { initTestApp } from '../utils/core/init-test-app';
+import { deleteAllData } from '../utils/core/delete-all-data';
 import { FULL_PATH } from '../../src/core/constants/paths';
 
 describe('Blogs API body validation', () => {
   let nestApp: INestApplication<App>;
   let app: App;
+  let storage;
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
+    const result = await initTestApp();
 
-    nestApp = moduleFixture.createNestApplication<INestApplication<App>>();
-
-    appSetup(nestApp);
-
-    await nestApp.init();
-
-    app = nestApp.getHttpServer();
+    nestApp = result.nestApp;
+    app = result.httpServer;
+    storage = result.throttlerStorage;
   });
 
   afterAll(async () => {
@@ -31,9 +25,8 @@ describe('Blogs API body validation', () => {
   });
 
   beforeEach(async () => {
-    await request(app)
-      .delete(FULL_PATH.TESTING_ALL)
-      .expect(HttpStatus.NO_CONTENT);
+    await storage._storage.clear();
+    await deleteAllData(app);
   });
 
   describe(`POST ${FULL_PATH.BLOGS}`, () => {
